@@ -14,10 +14,10 @@ There are three different build options, which can be adjusted at the top of the
 - ```STRIP```: Select ```TRUE``` to strip out redundant code or ```FALSE``` to retain
 - ```Version```: Select ```STH``` for a build based on the loader from ```STH``` disc image, or V3 for loader from the Release 3 disc image
 
-```DFS``` / ```FALSE``` / ```STH``` will rebuild the original ```ExileL``` file from the STH disc image.
+```DFS``` / ```FALSE``` / ```STH``` will rebuild the original ```ExileL``` file from the STH disc image.  
 File SHA1: c3d934b5c4e039aa76ce25e360e04c1f71468132
 
-```DFS``` / ```FALSE``` / ```V3``` will rebuild the original ```ExileL``` file from the Release 3 disc image.
+```DFS``` / ```FALSE``` / ```V3``` will rebuild the original ```ExileL``` file from the Release 3 disc image.  
 File SHA1: cb8a12fad92fcfc139caa2e9107e807d3aa952d6
 
 # The Various Exile Release Disc Images
@@ -40,7 +40,7 @@ https://stardot.org.uk/forums/viewtopic.php?p=444883#p444883
 
 It is worth highlighting that although the files have been decrypted, they have not been modified in any other way, and a level of copy protection, requiring the user to enter a word from the supplied novella in order to proceed, is still active on this disc.
 
-Release 4: ```Exile.zip```
+- Release 4: ```Exile.zip```
 
 This forth release is available for download from the Stairway To Hell (STH) software archive site:
 
