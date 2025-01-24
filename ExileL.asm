@@ -1,24 +1,99 @@
+;RELOC_ADDR: Select either PAGE_15 or PAGE_17
+PAGE_15 = 0
+PAGE_17 = 1
+
 ;FSN: Select the file system to build for
 DFS  = 0  ; This will build the original loader file that works with DFS
-NET  = 1  ; This will build a loader file that works with Econet.
-ADFS = 2  ; This will build a loader file that works with ADFS (Future!!!)
+NFS  = 1  ; This will build a loader file that works with Econet.
+ADFS = 2  ; This will build a loader file that works with ADFS
 
-;STRIP: Select TRUE to strip out redundant code
+;REMOVE_DEAD_CODE: Select TRUE to strip out redundant code
+; TRUE = -1
+; FALSE = 0
+
+;SWRAM_FE6x: TRUE, FALSE or NOP
+; TRUE = -1
+; FALSE = 0
+NOP = 1
+
+;FS_TAPE_SWITCH: TRUE, FALSE or NOP (IF TRUE, will switch from TAPE to FS)
+; TRUE = -1
+; FALSE = 0
+; NOP = 1
+
+;DYN_MAP_DATA_ADDR: FALSE to set map_addr at &41e0. TRUE to follow on from previous code
+; TRUE = -1
+; FALSE = 0
+
+;KEEP_FINAL_JMP: TRUE or FALSE
+; TRUE = -1
+; FALSE = 0
 
 ;VERSION: Select the source build file
-STH  = 0  ; Based on the Loader file from the STH archives
-V1   = 1  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_2066CA7D_1.hfe (Future!!!)
-V2   = 2  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_EA8CECA2_1.hfe (Future!!!)
-V3   = 3  ; Based on the Loader file from the hfe image Exile_D1S2_80T_HG3_162468BD_1.hfe
+STH    = 0  ; Based on the Loader file from the STH archives
+V1     = 1  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_2066CA7D_1.hfe
+V2     = 2  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_EA8CECA2_1.hfe
+V3     = 3  ; Based on the Loader file from the hfe image Exile_D1S2_80T_HG3_162468BD_1.hfe
+MC     = 4  ; Based on the Loader file from the hfe image Exile_A6B2BE99.hfe
+CUSTOM = 5  ; Custom build
 
-;Update this table, selecting from the options above
-FSN     = DFS    ; (Options are DFS or NET)
-STRIP   = FALSE  ; (Options are TRUE or FALSE)
-VERSION = STH    ; (Options are STH or V3)
+VERSION = V3
 
-IF (FSN <> DFS AND FSN <> NET):ERROR "Incorrect File System Option Selected":ENDIF
-IF (STRIP <> TRUE AND STRIP <> FALSE):ERROR "Incorrect Strip Option Selected":ENDIF
-IF (VERSION <> STH AND VERSION <> V3):ERROR "Incorrect Source Version Option Selected":ENDIF
+IF (VERSION < STH OR VERSION > CUSTOM):ERROR "Incorrect Source Version Option Selected":ENDIF
+
+IF VERSION = STH
+RELOC_ADDR = PAGE_15
+FSN = DFS
+REMOVE_DEAD_CODE = FALSE
+SWRAM_FE6x = TRUE
+FS_TAPE_SWITCH = NOP
+DYN_MAP_DATA_ADDR = FALSE
+KEEP_FINAL_JMP = TRUE
+
+ELIF VERSION = V1
+RELOC_ADDR = PAGE_15
+FSN = DFS
+REMOVE_DEAD_CODE = FALSE
+SWRAM_FE6x = TRUE
+FS_TAPE_SWITCH = TRUE
+DYN_MAP_DATA_ADDR = FALSE
+KEEP_FINAL_JMP = FALSE
+
+ELIF VERSION = V2 OR VERSION = V3
+RELOC_ADDR = PAGE_17
+FSN = DFS
+REMOVE_DEAD_CODE = FALSE
+SWRAM_FE6x = TRUE
+FS_TAPE_SWITCH = FALSE
+DYN_MAP_DATA_ADDR = FALSE
+KEEP_FINAL_JMP = FALSE
+
+ELIF VERSION = MC
+RELOC_ADDR = PAGE_15
+FSN = ADFS
+REMOVE_DEAD_CODE = FALSE
+SWRAM_FE6x = TRUE
+FS_TAPE_SWITCH = TRUE
+DYN_MAP_DATA_ADDR = FALSE
+KEEP_FINAL_JMP = FALSE
+
+ELIF VERSION = CUSTOM
+RELOC_ADDR = PAGE_17
+FSN = NFS
+REMOVE_DEAD_CODE = TRUE
+SWRAM_FE6x = FALSE
+FS_TAPE_SWITCH = FALSE
+DYN_MAP_DATA_ADDR = TRUE
+KEEP_FINAL_JMP = FALSE
+ENDIF
+
+IF NOT(RELOC_ADDR = PAGE_15 OR RELOC_ADDR = PAGE_17):ERROR "Incorrect Relocation Address Option Selected":ENDIF
+IF (FSN < DFS OR FSN > ADFS):ERROR "Incorrect File System Option Selected":ENDIF
+IF NOT(REMOVE_DEAD_CODE = TRUE OR REMOVE_DEAD_CODE = FALSE):ERROR "Incorrect Remove Dead Code Option Selected":ENDIF
+IF NOT(SWRAM_FE6x = TRUE OR SWRAM_FE6x = FALSE OR SWRAM_FE6x = NOP):ERROR "Incorrect SWRAM FE6x Option Selected":ENDIF
+IF NOT(FS_TAPE_SWITCH = TRUE OR FS_TAPE_SWITCH = FALSE OR FS_TAPE_SWITCH = NOP):ERROR "Incorrect Tape / FS Option Selected":ENDIF
+IF NOT(DYN_MAP_DATA_ADDR = TRUE OR DYN_MAP_DATA_ADDR = FALSE):ERROR "Incorrect Dynamic .map_data Address Option Selected":ENDIF
+IF NOT(KEEP_FINAL_JMP = TRUE OR KEEP_FINAL_JMP = FALSE):ERROR "Incorrect Keep Final Jump Option Selected":ENDIF
 
 ; Constants
 cr                                                 = 13
@@ -183,7 +258,7 @@ video_ula_palette               = &fe21
 romsel                          = &fe30
 lfe32                           = &fe32
 
-IF VERSION = V3
+IF SWRAM_FE6x = TRUE
 user_via_orb_irb                = &fe60
 user_via_ddrb                   = &fe62
 ENDIF
@@ -202,10 +277,10 @@ oscli                           = &fff7
 
 .code_start
 
-IF VERSION = V3
-    org &1700
-ELSE
+IF RELOC_ADDR = PAGE_15
     org &1500
+ELSE
+    org &1700
 ENDIF
 
 ;; ##############################################################################
@@ -1573,7 +1648,7 @@ ENDIF
     lda skip_sprite_calculation_flags
     jmp object_needs_redrawing_in
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     and #5
     beq object_needs_redrawing_in
@@ -2005,7 +2080,7 @@ ENDIF
 .loop_c22d1
     rts
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     jsr setup_background_sprite_values
     cpy #&19                           ; is the square an empty space?
@@ -2979,16 +3054,12 @@ ENDIF
 .c2889
     lda #&0f
 
-IF VERSION = V3
+IF SWRAM_FE6x = TRUE
     sta user_via_ddrb
     stx user_via_orb_irb
-ELSE
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
+ELIF SWRAM_FE6x = NOP
+    nop:nop:nop
+    nop:nop:nop
 ENDIF
 
     stx lfe32
@@ -3458,21 +3529,89 @@ ENDIF
 .c2bbe
     rts
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Unreferenced data 
  equb &ff,   0, &e0,   0,   7,   0, &c0,   0,   4,   0
     equs "&$", '"'
 ENDIF
 
+IF FSN = ADFS
+.print_insert_own_disc_and_wait
+    ldx #<insert_own_disc_txt
+    ldy #>insert_own_disc_txt
+    jsr print_txt
+.loop_c29d3
+    jsr get_keypress
+    cmp #cr
+    bne loop_c29d3
+    rts
+
+.print_insert_exile_disc_and_wait
+    ldx #<insert_exile_disc_txt
+    ldy #>insert_exile_disc_txt
+    jsr print_txt
+.loop_c29e2
+    jsr get_keypress
+    cmp #cr
+    bne loop_c29e2
+    jsr setup_crtc
+    rts
+ELSE
+
+IF REMOVE_DEAD_CODE = FALSE
 .empty_routine
     rts
 
-IF STRIP = FALSE
 ; Uncalled code
     rts
 ENDIF
+ENDIF
 
-IF FSN = DFS
+IF FSN = ADFS
+.get_drive_number
+    jsr setup_pointers
+    ldx #<directory_txt
+    ldy #>directory_txt
+    jsr print_txt
+    jsr get_filename
+    lda osfile_filename
+    cmp #cr
+    beq c2a14
+    ldy #&ff
+.loop_c2a03
+    iny
+    lda osfile_filename,y
+    sta osfile_path + 3,y
+    sta directory_name_txt,y
+    cmp #cr
+    bne loop_c2a03
+    sty osfile_path_pointer
+.c2a14
+    ldx #<drive_txt
+    ldy #>drive_txt
+    jsr print_txt
+    lda #&ff
+    sta l3451
+    jsr sub_c3170
+.loop_c2a23
+    jsr get_keypress
+    cmp #cr
+    beq c2a41
+    sec
+    sbc #&30                           ; '0'
+    cmp #8
+    bcs loop_c2a23
+    adc #&30                           ; '0'
+    sta osfile_path + 1
+    sta catalogue_txt + 4
+    jsr oswrch                         ; Write character
+    lda #cr
+    jsr oswrch                         ; Write character 13
+.c2a41
+    jsr oswrch                         ; Write character
+    rts
+
+ELIF FSN = DFS
 .get_drive_number
     jsr setup_pointers
     ldx #<drive_txt
@@ -3483,7 +3622,7 @@ IF FSN = DFS
     jsr sub_c3170
 .loop_c2be0
     jsr get_keypress
-    cmp #&0d
+    cmp #cr
     beq c2bfe
     sec
     sbc #&30                           ; '0'
@@ -3493,12 +3632,13 @@ IF FSN = DFS
     sta osfile_path_and_filename + 1
     sta catalogue_txt + 4
     jsr oswrch                         ; Write character
-    lda #&0d
+    lda #cr
     jsr oswrch                         ; Write character 13
 .c2bfe
     jsr oswrch                         ; Write character
     rts
-ELIF STRIP = FALSE
+
+ELIF REMOVE_DEAD_CODE = FALSE
 .get_drive_number
     jsr setup_pointers
     ldx #<drive_txt
@@ -3509,7 +3649,7 @@ ELIF STRIP = FALSE
     jsr sub_c3170
 .loop_c2be0
     jsr get_keypress
-    cmp #&0d
+    cmp #cr
     beq c2bfe
     sec
     sbc #&30                           ; '0'
@@ -3519,7 +3659,7 @@ ELIF STRIP = FALSE
     sta osfile_path_and_filename + 1
     sta catalogue_txt + 4
     jsr oswrch                         ; Write character
-    lda #&0d
+    lda #cr
     jsr oswrch                         ; Write character 13
 .c2bfe
     jsr oswrch                         ; Write character
@@ -3528,7 +3668,10 @@ ENDIF
     
 .show_catalogue_code
     jsr setup_crtc
-IF STRIP = FALSE
+IF FSN = ADFS
+    jsr print_insert_own_disc_and_wait
+    jsr get_drive_number
+ELIF REMOVE_DEAD_CODE = FALSE
     jsr empty_routine
 ENDIF
 
@@ -3541,16 +3684,28 @@ ENDIF
     jsr oscli
     jmp wait_cr_spc_display_menu
 
+IF FSN = ADFS
+.directory_txt
+    equb &11, &21, cr, lf
+    equs "Directory?"
+    equb cr, lf, lf, &3f, &11, &77,   0
+.drive_txt
+    equb &11, &21, cr, lf
+    equs "Drive?"
+    equb &11, &77,   0
+ELSE
+
 IF FSN = DFS
 .drive_txt
-    equb &11, &21, &0d, &0a
+    equb &11, &21, cr, lf
     equs "Drive?"
     equb &11, &77,   0
-ELIF STRIP = FALSE
+ELIF REMOVE_DEAD_CODE = FALSE
 .drive_txt
-    equb &11, &21, &0d, &0a
+    equb &11, &21, cr, lf
     equs "Drive?"
     equb &11, &77,   0
+ENDIF
 ENDIF
 
 .sub_c2c25
@@ -3587,8 +3742,36 @@ ENDIF
     equb 0, 0
 
 .save_position_code
+IF FSN = ADFS
     jsr initialise_screen
-IF STRIP = FALSE
+    jsr print_insert_own_disc_and_wait
+    ldx #<save_filename_txt
+    ldy #>save_filename_txt
+    jsr print_txt
+    jsr get_filename
+    ldy #0
+.loop_c2acf
+    lda osfile_filename,y
+    sta filename_table_2_txt,y
+    iny
+    cmp #cr
+    bne loop_c2acf
+    jsr copy_save_table_to_osfile_control_block
+    jsr get_drive_number
+    ldy osfile_path_pointer
+    lda #&2e
+    sta osfile_path + 3,y
+    ldx #&ff
+.loop_c2aea
+    iny
+    inx
+    lda filename_table_2_txt,x
+    sta osfile_path + 3,y
+    cmp #cr
+    bne loop_c2aea
+ELSE
+    jsr initialise_screen
+IF REMOVE_DEAD_CODE = FALSE
     jsr empty_routine
 ENDIF
     ldx #<save_filename_txt
@@ -3598,6 +3781,7 @@ ENDIF
     jsr copy_save_table_to_osfile_control_block
 IF FSN = DFS
     jsr get_drive_number
+ENDIF
 ENDIF
     lda #osfile_save
     ldx #<(osfile_control_block)
@@ -3609,8 +3793,36 @@ ENDIF
     jmp display_menu
 
 .load_position_code
+IF FSN = ADFS
     jsr initialise_screen
-IF STRIP = FALSE
+    jsr print_insert_own_disc_and_wait
+    ldx #<load_filename_txt
+    ldy #>load_filename_txt
+    jsr print_txt
+    jsr get_filename
+    ldy #0
+.loop_c2b1c
+    lda osfile_filename,y
+    sta filename_table_2_txt,y
+    iny
+    cmp #cr
+    bne loop_c2b1c
+    jsr copy_load_table_to_osfile_control_block
+    jsr get_drive_number
+    ldy osfile_path_pointer
+    lda #&2e
+    sta osfile_path + 3,y
+    ldx #&ff
+.loop_c2b37
+    iny
+    inx
+    lda filename_table_2_txt,x
+    sta osfile_path + 3,y
+    cmp #cr
+    bne loop_c2b37
+ELSE
+    jsr initialise_screen
+IF REMOVE_DEAD_CODE = FALSE
     jsr empty_routine
 ENDIF
     ldx #<load_filename_txt
@@ -3620,6 +3832,7 @@ ENDIF
     jsr copy_load_table_to_osfile_control_block
 IF FSN = DFS
     jsr get_drive_number
+ENDIF
 ENDIF
     lda #osfile_read_catalogue_info
     ldx #<(osfile_control_block)
@@ -3649,6 +3862,15 @@ ENDIF
 
 .load_file
     jsr copy_load_table_to_osfile_control_block
+IF FSN = ADFS
+    clc
+    lda osfile_control_block
+    adc #3
+    sta osfile_control_block
+    lda osfile_control_block + 1
+    adc #0
+    sta osfile_control_block + 1
+ENDIF
     lda #osfile_load
     ldx #<(osfile_control_block)
     ldy #>(osfile_control_block)
@@ -3699,6 +3921,47 @@ ENDIF
     equb cr, lf, lf
     equs "?"
     equb 0
+ 
+IF FSN = ADFS 
+.insert_own_disc_txt
+    equb &11, &33
+.l2bf9
+    equs "Insert your own disc"
+    equb cr, lf
+    equs "and press RETURN"
+    equb lf, cr
+    equb 0
+.insert_exile_disc_txt
+    equb &11, &23
+    equs "Insert "
+    equb &11, &33
+    equs "EXILE "
+    equb &11, &23
+    equs "disc"
+    equb cr, lf
+    equs "and press RETURN"
+    equb lf, lf, cr
+    equb 0
+ENDIF
+
+IF FSN = ADFS
+.osfile_control_block
+    equw osfile_path
+    equb   0,   4, &ff, &ff,   0,   0,   0,   0,   0,   0,   0,   0
+    equb   0,   0,   0,   0
+.osfile_load_table
+    equw osfile_path
+    equb   0,   4, &ff, &ff,   0,   0,   0,   0,   0,   0,   0,   0
+    equb   0,   0,   0,   0
+.osfile_save_table
+    equw osfile_path
+    equb   0, &2c, &ff, &ff,   0,   0,   0,   0,   0,   4, &ff, &ff
+    equb   0,   8, &ff, &ff
+.filename_table_2_txt
+    equb cr                                                       
+    equs "              "                                          
+
+ELSE
 .osfile_control_block
     equw osfile_path_and_filename
     equb   0,   4, &ff, &ff,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
@@ -3711,13 +3974,18 @@ ENDIF
     equw osfile_path_and_filename
     equb   0, &2c, &ff, &ff,   0,   0,   0,   0,   0,   4, &ff, &ff,   0,   8
     equb &ff, &ff
+ENDIF
 
 .format_filename_table_txt
     ldx #&ff
     ldy #0
 .get_next_char
     inx
+IF FSN = ADFS
+    lda filename_table_2_txt,x
+ELSE
     lda osfile_filename,x
+ENDIF
     cmp #spc
     beq get_next_char
     cmp #cr
@@ -4030,7 +4298,7 @@ ENDIF
     sta zp_5e
     rts
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     ldx #&0f
     lda #0
@@ -4048,7 +4316,7 @@ ENDIF
     jsr sub_c22db
     jmp change_display_mode
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     lda c2288
     eor #&14
@@ -4082,7 +4350,7 @@ ENDIF
 .sub_c3026
 {
     ldx #1
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
     jmp c302d
 
 ; Uncalled code
@@ -4389,9 +4657,9 @@ ENDIF
     jmp restore_xya_rts
 .c321d
     lda l31ff + 1
-    cmp #&20
+    cmp #spc
     bcs c3266
-    cmp #&0d
+    cmp #cr
     bne c3233
     lda #0
     sta screen_offset_x
@@ -4701,6 +4969,19 @@ ENDIF
     equb max_number_of_chars           ; Maximum line length
     equb      min_char_value           ; Min. acceptable character value
     equb      max_char_value           ; Max. acceptable character value
+
+IF FSN = ADFS
+.osfile_filename
+    equb cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr
+    equb cr, cr, cr
+.osfile_path
+    equs ":0.$"
+    equb cr
+    equs "                              "
+.osfile_path_pointer
+    equb 1
+
+ELSE
 .osfile_path_and_filename
 IF FSN = DFS
     equs ":0."
@@ -4708,8 +4989,9 @@ ELSE
     equs "SAVES."
 ENDIF
 .osfile_filename
-    equb &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d, &0d
-    equb &0d
+    equb cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr
+    equb cr
+ENDIF
 
 .get_keypress
 {
@@ -4749,7 +5031,7 @@ ENDIF
     jmp c347e
 }
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     ldx #<close_file_return_to_menu
     ldy #>close_file_return_to_menu
@@ -4881,7 +5163,7 @@ ENDIF
     ldy #0
     jsr osbyte                         ; Write Set normal ESCAPE action, clear memory on BREAK, value X=2
 
-IF VERSION = STH
+IF RELOC_ADDR = PAGE_15
     lda filev
     sta tmp_filev_ptr_save
     lda filev+1
@@ -4893,28 +5175,38 @@ IF VERSION = STH
 ENDIF
  
     jsr update_wrchv
-IF VERSION = STH
-; 
-; **************************************************************
-; I assume some code has been patched out here!
-; **************************************************************
-; 
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
-ENDIF
 
+IF FS_TAPE_SWITCH = TRUE
+IF FSN = DFS
+    ldx #<(tape_1_txt)
+    ldy #>(tape_1_txt)
+    jsr oscli
+    ldx #<(disc_1_txt)
+    ldy #>(disc_1_txt)
+    jsr oscli
+ELIF FSN = ADFS
+    ldx #<(tape_1_txt)
+    ldy #>(tape_1_txt)
+    jsr oscli
+    ldx #<(adfs_1_txt)
+    ldy #>(adfs_1_txt)
+    jsr oscli
+ELIF FSN = NFS
+    ldx #<(tape_1_txt)
+    ldy #>(tape_1_txt)
+    jsr oscli
+    ldx #<(net_1_txt)
+    ldy #>(net_1_txt)
+    jsr oscli
+ENDIF
+ELIF FS_TAPE_SWITCH = NOP
+    nop:nop
+    nop:nop
+    nop:nop:nop
+    nop:nop
+    nop:nop
+    nop:nop:nop
+ENDIF
     jsr sub_c2aad
 ; 
 ; **************************************************************
@@ -4961,7 +5253,7 @@ ENDIF
 .c359f
     jsr get_keypress
     bcs c359f
-    cmp #&20
+    cmp #spc
     bne c35ab
     jmp display_menu
 .c35ab
@@ -5424,9 +5716,9 @@ ENDIF
 
 .wait_cr_spc_display_menu
 {    jsr get_keypress
-    cmp #&0d
+    cmp #cr
     beq display_menu
-    cmp #&20
+    cmp #spc
     bne wait_cr_spc_display_menu
 }
 
@@ -5640,7 +5932,7 @@ ENDIF
 .filename_table_txt
     equs "................"
 .l3b56
-IF VERSION = V3
+IF RELOC_ADDR = PAGE_17
     equw run_game_no_swram + 1
 ELSE
     equw &3b9c
@@ -5653,6 +5945,9 @@ ENDIF
     ldy #0
     jsr osbyte                         ; Write Disable ESCAPE action, clear memory on BREAK, value X=3
     jsr setup_crtc
+IF FSN = ADFS
+    jsr print_insert_exile_disc_and_wait                              ; 55c1: 20 db 29     .) :3ac1[1]
+ENDIF
     lda tmp_filev_ptr_save
     sta filev
     lda tmp_filev_ptr_save + 1
@@ -5707,32 +6002,76 @@ ENDIF
     jmp oscli
 }
 
+IF FSN = ADFS
+.run_ExileSR
+    equs "/:0.ExileSR"
+    equb cr
+.run_ExileB
+    equs "/:0.ExileB"
+    equb cr
+.catalogue_txt
+    equs "CAT:0."
+.directory_name_txt
+    equs "$"
+    equb cr
+    equs "              "
+IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
+.adfs_1_txt
+    equs "ADFS"
+    equb cr
+.tape_1_txt
+    equs "TAPE"
+    equb cr
+    equb   0
+    equw osfile_control_block
+    equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ENDIF
+
+ELIF FSN = NFS
 .run_ExileSR
     equs "/ExileSR"
     equb cr
-
 .run_ExileB
     equs "/ExileB"
     equb cr
-
 .catalogue_txt
-IF FSN = DFS
-    equs "CAT 0"
-ELSE
     equs "CAT SAVES"
-ENDIF
     equb cr
-IF STRIP = FALSE
-    equs "DISC"
+IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
+.net_1_txt
+    equs "NET"
     equb cr
+.tape_1_txt
     equs "TAPE"
     equb cr
-IF VERSION = V3
-    equb   0, &48, &2d,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
+    equb   0
+    equw osfile_control_block
+    equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ENDIF
+
 ELSE
-    equb   0, &48, &2b,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
+.run_ExileSR
+    equs "/ExileSR"
+    equb cr
+.run_ExileB
+    equs "/ExileB"
+    equb cr
+.catalogue_txt
+    equs "CAT 0"
+    equb cr
+IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
+.disc_1_txt
+    equs "DISC"
+    equb cr
+.tape_1_txt
+    equs "TAPE"
+    equb cr
+    equb   0
+    equw osfile_control_block
+    equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ENDIF
 ENDIF
+
 .swr_req_txt
     equb &11, &31
     equs "May I use your Sideways"
@@ -5769,7 +6108,7 @@ ENDIF
     rts
 }
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     lda #5
     bit square_orientation
@@ -5900,7 +6239,7 @@ ENDIF
 .pull_objects_in_from_tertiary_stack
 {
     ldy #0
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
     equb &2c                           ; overlapping BIT &xxxx
 
     ldy #8                             ; but nothing calling this command
@@ -6007,7 +6346,7 @@ ENDIF
     rts
 }
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     rol a
     eor #1
@@ -6164,7 +6503,7 @@ ENDIF
     rts
 }
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Uncalled code
     rts
 ENDIF
@@ -6180,8 +6519,8 @@ ENDIF
 .handle_explosion
     rts
 
-IF STRIP = FALSE
-IF VERSION = V3
+IF REMOVE_DEAD_CODE = FALSE
+IF VERSION = V2 OR VERSION = V3
 ; unreferenced data
     equb &2c, &d7, &3a, &65, &2c, &e5, &3a, &c9, &35, &c7, &3a, &e1, &33, &f3, &3a, &ff
     equb &ff
@@ -6196,6 +6535,28 @@ IF VERSION = V3
     equs "Save position"
     equb 0
     equs "Default posi"
+ELIF VERSION = MC
+; unreferenced data
+    equb &3a, &20, &31, &34, &4c, &84, &39, &c9,   1, &d0, &0a, &a2, &85, &a0, &3a, &20
+    equb &31, &34, &4c, &84, &39, &c9,   2, &d0, &0a, &a2, &8f, &a0, &3a, &20, &31, &34
+    equb &4c, &7d, &39, &a2, &99, &a0, &3a, &20, &31, &34, &a2, &a3, &a0, &3a, &20, &31
+    equb &34, &20, &a0, &33, &38, &e9, &30, &cd, &b0, &38, &b0, &f5, &0a, &0a, &aa, &bd
+    equb &f2, &39, &85, &1b, &bd, &f3, &39, &85, &1c, &6c, &1b,   0, &a9,   6, &20, &bf
+    equb &32, &a9,   7, &20, &dd, &32, &a2, &c8, &a0, &39, &20, &31, &34, &a9,   0, &20
+    equb &dd, &32, &a2, &d3, &a0, &39, &20, &31, &34, &a9,   7, &20, &dd, &32, &a2, &d8
+    equb &a0, &39, &4c, &31, &34, &11, &53, &8b, &11, &1e, &8a, &8a, &8a, &8a, &8c,   0
+    equb &11, &33, &8f, &90,   0, &11, &1e, &8d, &8a, &8a, &8a, &8a, &11, &53, &8e, &0d
+    equb   0, &11, &31, &20, &20, &20, &20, &20, &20, &20, &20, &20, &20, &46,   0, &b5
+    equb &3a, &14, &3a, &29, &36, &1d, &3a, &b8, &34, &61, &3a, &45, &2a, &6e, &3a, &0a
+    equb &2b, &34, &3a, &bd, &2a, &42, &3a, &26, &35, &24, &3a, &f7, &32, &50, &3a, &ff
+    equb &ff
+    equs "Run Game"
+    equb 0
+    equs "Status"
+    equb 0
+    equs "Score Breakdown"
+    equb 0
+    equs "Lo"
 ELSE
 ; unreferenced data
     equb &48, &11, &38, &91, &90, &0c, &3a, &8f, &68, &72, &88, &8c, &87, &8f, &96,   8
@@ -6240,6 +6601,9 @@ ELSE
     equb 0
     equs "Lo"
 ENDIF
+ENDIF
+
+IF DYN_MAP_DATA_ADDR = FALSE
 org &41e0
 ENDIF
 
@@ -6688,7 +7052,7 @@ ENDIF
 ;; 
 ;; ##############################################################################
 
-IF STRIP = FALSE
+IF REMOVE_DEAD_CODE = FALSE
 ; Unreferenced data
     equb &16, &16, &16, &16, &16, &16, &16, &16,   6,   6,   6,   6,   6,   6,   6, &17
     equb &16, &16, &16, &19, &1e, &23, &16, &17,   9,   6,   6, &13, &17, &17, &17, &17
@@ -6731,47 +7095,36 @@ IF STRIP = FALSE
 
 ; Unreferenced data
     equs "manLI"
-    equb &0d
+    equb cr
     equs "manLF"
-    equb &0d
+    equb cr
     equs "manKN"
-    equb &0d
+    equb cr
     equs "manLB"
-    equb &0d
+    equb cr
     equs "manST"
-    equb &0d
+    equb cr
     equs "manRU1"
-    equb &0d
+    equb cr
     equs "manRU2"
-    equb &0d
+    equb cr
     equs "manRU3"
-    equb &0d
+    equb cr
     equs "line1"
-    equb &0d
+    equb cr
     equs "line2"
-    equb &0d
+    equb cr
     equs "line3"
-    equb &0d
+    equb cr
     equs "line4"
-    equb &0d, &6c
+    equb cr, &6c
 ENDIF
 
 .end_of_reloc_code
-    ; Copy the newly assembled block of code back to it's proper place in the binary
-    ; file.
-    ; (Note the parameter order: 'copyblock <start>,<end>,<dest>')
+
     copyblock main_begin, end_of_reloc_code, code_start
-
-    ; Clear the area of memory we just temporarily used to assemble the new block,
-    ; allowing us to assemble there again if needed
     clear main_begin, code_start
-
-    ; Set the program counter to the next position in the binary file.
-IF STRIP = FALSE
-    org code_start + (l59e0 - main_begin)
-ELSE
     org code_start + (end_of_reloc_code - main_begin)
-ENDIF
 
 .start_addr
 {
@@ -6814,7 +7167,7 @@ ENDIF
     ldx #3
     ldy #0
     jsr osbyte                                                                  ; Write Disable ESCAPE action, clear memory on BREAK, value X=3
-IF FSN = DFS
+IF FSN <> NFS
     lda #osbyte_issue_service_request
     ldx #&0c
     ldy #&ff
@@ -6828,7 +7181,7 @@ ENDIF
     ldx #0
     jsr osbyte                                                                  ; Implode character definition RAM, can redefine characters 128-159 (X=0)
 
-IF VERSION = V3
+IF RELOC_ADDR = PAGE_17
 ; 
 ; **************************************************************
 ; Save copy of file system vectors and reselect file system
@@ -6868,7 +7221,6 @@ ENDIF
 ; loader will report 'default' instead of 'unsaved'
 ; **************************************************************
 ; 
-;IF STRIP = FALSE
     lda #1
     sta l351f - main_begin + code_start
     lda #&82
@@ -6903,11 +7255,8 @@ ENDIF
 ;ENDIF
 ; 
 ; **************************************************************
-IF VERSION = V3
-; Relocate code from &3000..&72df to &1700..&59df
-ELSE
+; Relocate code from &3000..&72df to &1700..&59df or
 ; Relocate code from &3000..&74df to &1500..&59df
-ENDIF
 ; **************************************************************
 ; 
 .main_game_relocation
@@ -6947,15 +7296,17 @@ ENDIF
     jmp relocation_run
 }
 
-IF VERSION = V3
+IF RELOC_ADDR = PAGE_17
 .tape_txt
     equs "TAPE"
     equb cr
 .disc_txt
 IF FSN = DFS
     equs "DISC"
-ELSE
+ELIF FSN = NFS
     equs "NET"
+ELSE
+    equs "ADFS"
 ENDIF
     equb cr
 ENDIF
@@ -6989,7 +7340,9 @@ ENDIF
 ; Unused jump left over from decryption code
 ; **************************************************************
 ; 
+IF KEEP_FINAL_JMP = TRUE
     jmp code_start
+ENDIF
 
 .code_end
 
