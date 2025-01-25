@@ -53,7 +53,7 @@ V3     = 3  ; Based on the Loader file from the hfe image Exile_D1S2_80T_HG3_162
 MC     = 4  ; Based on the Loader file from the hfe image Exile_A6B2BE99.hfe
 CUSTOM = 5  ; Custom build - Adjust CUSTOM settings below (after line: IF VERSION = CUSTOM)
 
-VERSION = MC
+VERSION = V3
 
 IF (VERSION < STH OR VERSION > CUSTOM):ERROR "Incorrect Source Version Option Selected":ENDIF
 
