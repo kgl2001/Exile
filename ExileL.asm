@@ -2,7 +2,7 @@
 PAGE_15 = 0
 PAGE_17 = 1
 
-;FSN: Select the file system to build for
+;FILE_SYSTEM: Select the file system to build for
 DFS  = 0  ; This will build the original loader file that works with DFS
 NFS  = 1  ; This will build a loader file that works with Econet.
 ADFS = 2  ; This will build a loader file that works with ADFS
@@ -16,14 +16,30 @@ ADFS = 2  ; This will build a loader file that works with ADFS
 ; FALSE = 0
 NOP = 1
 
-;FS_TAPE_SWITCH: TRUE, FALSE or NOP (IF TRUE, will switch from TAPE to FS)
+;DYN_MAP_DATA_ADDR: FALSE to set map_addr at &41e0. TRUE to follow on from previous code
+; TRUE = -1
+; FALSE = 0
+
+;RELOC_FILEV_PTR_SAVE: TRUE, FALSE or NOP. If TRUE or NOP, text at .reloc_tape_txt will be generated, regardless of RELOC_FILEV_PTR_TXT setting.
 ; TRUE = -1
 ; FALSE = 0
 ; NOP = 1
 
-;DYN_MAP_DATA_ADDR: FALSE to set map_addr at &41e0. TRUE to follow on from previous code
+;RELOC_FILEV_PTR_TXT: TRUE or FALSE. Overridden (TRUE) if RELOC_FILEV_PTR_SAVE is set to TRUE or NOP.
 ; TRUE = -1
 ; FALSE = 0
+
+;STATIC_FILEV_PTR_SAVE: TRUE or FALSE. If TRUE, text at .static_tape_txt will be generated, regardless of STATIC_FILEV_PTR_TXT setting.
+; TRUE = -1
+; FALSE = 0
+
+;STATIC_FILEV_PTR_TXT: TRUE or FALSE. Overridden (TRUE) if STATIC_FILEV_PTR_SAVE is set to TRUE.
+; TRUE = -1
+; FALSE = 0
+
+;FILE_POINTER_SAVE: IN_STATIC to locate code in static area of memory. IN_RELOC to locate code in relocated area of memory
+IN_STATIC = 0
+IN_RELOC = 1
 
 ;KEEP_FINAL_JMP: TRUE or FALSE
 ; TRUE = -1
@@ -35,65 +51,83 @@ V1     = 1  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_206
 V2     = 2  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_EA8CECA2_1.hfe
 V3     = 3  ; Based on the Loader file from the hfe image Exile_D1S2_80T_HG3_162468BD_1.hfe
 MC     = 4  ; Based on the Loader file from the hfe image Exile_A6B2BE99.hfe
-CUSTOM = 5  ; Custom build
+CUSTOM = 5  ; Custom build - Adjust CUSTOM settings below (after line: IF VERSION = CUSTOM)
 
-VERSION = V3
+VERSION = MC
 
 IF (VERSION < STH OR VERSION > CUSTOM):ERROR "Incorrect Source Version Option Selected":ENDIF
 
 IF VERSION = STH
 RELOC_ADDR = PAGE_15
-FSN = DFS
+FILE_SYSTEM = DFS
 REMOVE_DEAD_CODE = FALSE
 SWRAM_FE6x = TRUE
-FS_TAPE_SWITCH = NOP
 DYN_MAP_DATA_ADDR = FALSE
+STATIC_FILEV_PTR_SAVE = FALSE
+STATIC_FILEV_PTR_TXT = FALSE
+RELOC_FILEV_PTR_SAVE = NOP
+RELOC_FILEV_PTR_TXT = TRUE
 KEEP_FINAL_JMP = TRUE
 
 ELIF VERSION = V1
 RELOC_ADDR = PAGE_15
-FSN = DFS
+FILE_SYSTEM = DFS
 REMOVE_DEAD_CODE = FALSE
 SWRAM_FE6x = TRUE
-FS_TAPE_SWITCH = TRUE
 DYN_MAP_DATA_ADDR = FALSE
+STATIC_FILEV_PTR_SAVE = FALSE
+STATIC_FILEV_PTR_TXT = FALSE
+RELOC_FILEV_PTR_SAVE = TRUE
+RELOC_FILEV_PTR_TXT = TRUE
 KEEP_FINAL_JMP = FALSE
 
 ELIF VERSION = V2 OR VERSION = V3
 RELOC_ADDR = PAGE_17
-FSN = DFS
+FILE_SYSTEM = DFS
 REMOVE_DEAD_CODE = FALSE
 SWRAM_FE6x = TRUE
-FS_TAPE_SWITCH = FALSE
 DYN_MAP_DATA_ADDR = FALSE
+STATIC_FILEV_PTR_SAVE = TRUE
+STATIC_FILEV_PTR_TXT = TRUE
+RELOC_FILEV_PTR_SAVE = FALSE
+RELOC_FILEV_PTR_TXT = TRUE
 KEEP_FINAL_JMP = FALSE
 
 ELIF VERSION = MC
 RELOC_ADDR = PAGE_15
-FSN = ADFS
+FILE_SYSTEM = ADFS
 REMOVE_DEAD_CODE = FALSE
 SWRAM_FE6x = TRUE
-FS_TAPE_SWITCH = TRUE
 DYN_MAP_DATA_ADDR = FALSE
+STATIC_FILEV_PTR_SAVE = FALSE
+STATIC_FILEV_PTR_TXT = FALSE
+RELOC_FILEV_PTR_SAVE = TRUE
+RELOC_FILEV_PTR_TXT = TRUE
 KEEP_FINAL_JMP = FALSE
 
 ELIF VERSION = CUSTOM
 RELOC_ADDR = PAGE_17
-FSN = NFS
+FILE_SYSTEM = NFS
 REMOVE_DEAD_CODE = TRUE
 SWRAM_FE6x = FALSE
-FS_TAPE_SWITCH = FALSE
 DYN_MAP_DATA_ADDR = TRUE
+STATIC_FILEV_PTR_SAVE = FALSE
+STATIC_FILEV_PTR_TXT = FALSE
+RELOC_FILEV_PTR_SAVE = FALSE
+RELOC_FILEV_PTR_TXT = FALSE
 KEEP_FINAL_JMP = FALSE
 ENDIF
 
-IF NOT(RELOC_ADDR = PAGE_15 OR RELOC_ADDR = PAGE_17):ERROR "Incorrect Relocation Address Option Selected":ENDIF
-IF (FSN < DFS OR FSN > ADFS):ERROR "Incorrect File System Option Selected":ENDIF
-IF NOT(REMOVE_DEAD_CODE = TRUE OR REMOVE_DEAD_CODE = FALSE):ERROR "Incorrect Remove Dead Code Option Selected":ENDIF
-IF NOT(SWRAM_FE6x = TRUE OR SWRAM_FE6x = FALSE OR SWRAM_FE6x = NOP):ERROR "Incorrect SWRAM FE6x Option Selected":ENDIF
-IF NOT(FS_TAPE_SWITCH = TRUE OR FS_TAPE_SWITCH = FALSE OR FS_TAPE_SWITCH = NOP):ERROR "Incorrect Tape / FS Option Selected":ENDIF
-IF NOT(DYN_MAP_DATA_ADDR = TRUE OR DYN_MAP_DATA_ADDR = FALSE):ERROR "Incorrect Dynamic .map_data Address Option Selected":ENDIF
-IF NOT(KEEP_FINAL_JMP = TRUE OR KEEP_FINAL_JMP = FALSE):ERROR "Incorrect Keep Final Jump Option Selected":ENDIF
+IF NOT(RELOC_ADDR = PAGE_15 OR RELOC_ADDR = PAGE_17):ERROR "Incorrect RELOC_ADDR Option Selected":ENDIF
+IF (FILE_SYSTEM < DFS OR FILE_SYSTEM > ADFS):ERROR "Incorrect FILE_SYSTEM Option Selected":ENDIF
+IF NOT(REMOVE_DEAD_CODE = TRUE OR REMOVE_DEAD_CODE = FALSE):ERROR "Incorrect REMOVE_DEAD_CODE Option Selected":ENDIF
+IF NOT(SWRAM_FE6x = TRUE OR SWRAM_FE6x = FALSE OR SWRAM_FE6x = NOP):ERROR "Incorrect SWRAM_FE6x Option Selected":ENDIF
+IF NOT(DYN_MAP_DATA_ADDR = TRUE OR DYN_MAP_DATA_ADDR = FALSE):ERROR "Incorrect DYN_MAP_DATA_ADDR Option Selected":ENDIF
+IF NOT(STATIC_FILEV_PTR_SAVE = TRUE OR STATIC_FILEV_PTR_SAVE = FALSE):ERROR "Incorrect STATIC_FILEV_PTR_SAVE Option Selected":ENDIF
+IF NOT(STATIC_FILEV_PTR_TXT = TRUE OR STATIC_FILEV_PTR_TXT = FALSE):ERROR "Incorrect STATIC_FILEV_PTR_TXT Option Selected":ENDIF
+IF NOT(RELOC_FILEV_PTR_SAVE = TRUE OR RELOC_FILEV_PTR_SAVE = FALSE OR RELOC_FILEV_PTR_SAVE = NOP):ERROR "Incorrect RELOC_FILEV_PTR_SAVE Option Selected":ENDIF
+IF NOT(RELOC_FILEV_PTR_TXT = TRUE OR RELOC_FILEV_PTR_TXT = FALSE):ERROR "Incorrect RELOC_FILEV_PTR_TXT Option Selected":ENDIF
+IF NOT(KEEP_FINAL_JMP = TRUE OR KEEP_FINAL_JMP = FALSE):ERROR "Incorrect KEEP_FINAL_JMP Option Selected":ENDIF
 
 ; Constants
 cr                                                 = 13
@@ -3535,7 +3569,7 @@ IF REMOVE_DEAD_CODE = FALSE
     equs "&$", '"'
 ENDIF
 
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
 .print_insert_own_disc_and_wait
     ldx #<insert_own_disc_txt
     ldy #>insert_own_disc_txt
@@ -3567,7 +3601,7 @@ IF REMOVE_DEAD_CODE = FALSE
 ENDIF
 ENDIF
 
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
 .get_drive_number
     jsr setup_pointers
     ldx #<directory_txt
@@ -3611,7 +3645,7 @@ IF FSN = ADFS
     jsr oswrch                         ; Write character
     rts
 
-ELIF FSN = DFS
+ELIF FILE_SYSTEM = DFS
 .get_drive_number
     jsr setup_pointers
     ldx #<drive_txt
@@ -3668,14 +3702,14 @@ ENDIF
     
 .show_catalogue_code
     jsr setup_crtc
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
     jsr print_insert_own_disc_and_wait
     jsr get_drive_number
 ELIF REMOVE_DEAD_CODE = FALSE
     jsr empty_routine
 ENDIF
 
-IF FSN = DFS
+IF FILE_SYSTEM = DFS
     jsr get_drive_number
 ENDIF
     jsr sub_c2ffb
@@ -3684,7 +3718,7 @@ ENDIF
     jsr oscli
     jmp wait_cr_spc_display_menu
 
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
 .directory_txt
     equb &11, &21, cr, lf
     equs "Directory?"
@@ -3695,7 +3729,7 @@ IF FSN = ADFS
     equb &11, &77,   0
 ELSE
 
-IF FSN = DFS
+IF FILE_SYSTEM = DFS
 .drive_txt
     equb &11, &21, cr, lf
     equs "Drive?"
@@ -3742,7 +3776,7 @@ ENDIF
     equb 0, 0
 
 .save_position_code
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
     jsr initialise_screen
     jsr print_insert_own_disc_and_wait
     ldx #<save_filename_txt
@@ -3779,7 +3813,7 @@ ENDIF
     jsr print_txt
     jsr get_filename
     jsr copy_save_table_to_osfile_control_block
-IF FSN = DFS
+IF FILE_SYSTEM = DFS
     jsr get_drive_number
 ENDIF
 ENDIF
@@ -3793,7 +3827,7 @@ ENDIF
     jmp display_menu
 
 .load_position_code
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
     jsr initialise_screen
     jsr print_insert_own_disc_and_wait
     ldx #<load_filename_txt
@@ -3830,7 +3864,7 @@ ENDIF
     jsr print_txt
     jsr get_filename
     jsr copy_load_table_to_osfile_control_block
-IF FSN = DFS
+IF FILE_SYSTEM = DFS
     jsr get_drive_number
 ENDIF
 ENDIF
@@ -3862,7 +3896,7 @@ ENDIF
 
 .load_file
     jsr copy_load_table_to_osfile_control_block
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
     clc
     lda osfile_control_block
     adc #3
@@ -3922,7 +3956,7 @@ ENDIF
     equs "?"
     equb 0
  
-IF FSN = ADFS 
+IF FILE_SYSTEM = ADFS 
 .insert_own_disc_txt
     equb &11, &33
 .l2bf9
@@ -3944,7 +3978,7 @@ IF FSN = ADFS
     equb 0
 ENDIF
 
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
 .osfile_control_block
     equw osfile_path
     equb   0,   4, &ff, &ff,   0,   0,   0,   0,   0,   0,   0,   0
@@ -3981,7 +4015,7 @@ ENDIF
     ldy #0
 .get_next_char
     inx
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
     lda filename_table_2_txt,x
 ELSE
     lda osfile_filename,x
@@ -4970,7 +5004,7 @@ ENDIF
     equb      min_char_value           ; Min. acceptable character value
     equb      max_char_value           ; Max. acceptable character value
 
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
 .osfile_filename
     equb cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr
     equb cr, cr, cr
@@ -4983,7 +5017,7 @@ IF FSN = ADFS
 
 ELSE
 .osfile_path_and_filename
-IF FSN = DFS
+IF FILE_SYSTEM = DFS
     equs ":0."
 ELSE
     equs "SAVES."
@@ -5163,7 +5197,7 @@ ENDIF
     ldy #0
     jsr osbyte                         ; Write Set normal ESCAPE action, clear memory on BREAK, value X=2
 
-IF RELOC_ADDR = PAGE_15
+IF RELOC_FILEV_PTR_SAVE = TRUE OR RELOC_FILEV_PTR_SAVE = NOP
     lda filev
     sta tmp_filev_ptr_save
     lda filev+1
@@ -5176,30 +5210,24 @@ ENDIF
  
     jsr update_wrchv
 
-IF FS_TAPE_SWITCH = TRUE
-IF FSN = DFS
-    ldx #<(tape_1_txt)
-    ldy #>(tape_1_txt)
+IF RELOC_FILEV_PTR_SAVE = TRUE
+    ldx #<(reloc_tape_txt)
+    ldy #>(reloc_tape_txt)
     jsr oscli
-    ldx #<(disc_1_txt)
-    ldy #>(disc_1_txt)
+IF FILE_SYSTEM = ADFS
+    ldx #<(reloc_adfs_txt)
+    ldy #>(reloc_adfs_txt)
     jsr oscli
-ELIF FSN = ADFS
-    ldx #<(tape_1_txt)
-    ldy #>(tape_1_txt)
+ELIF FILE_SYSTEM = NFS
+    ldx #<(reloc_net_txt)
+    ldy #>(reloc_net_txt)
     jsr oscli
-    ldx #<(adfs_1_txt)
-    ldy #>(adfs_1_txt)
-    jsr oscli
-ELIF FSN = NFS
-    ldx #<(tape_1_txt)
-    ldy #>(tape_1_txt)
-    jsr oscli
-    ldx #<(net_1_txt)
-    ldy #>(net_1_txt)
+ELSE
+    ldx #<(reloc_disc_txt)
+    ldy #>(reloc_disc_txt)
     jsr oscli
 ENDIF
-ELIF FS_TAPE_SWITCH = NOP
+ELIF RELOC_FILEV_PTR_SAVE = NOP
     nop:nop
     nop:nop
     nop:nop:nop
@@ -5945,7 +5973,7 @@ ENDIF
     ldy #0
     jsr osbyte                         ; Write Disable ESCAPE action, clear memory on BREAK, value X=3
     jsr setup_crtc
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
     jsr print_insert_exile_disc_and_wait                              ; 55c1: 20 db 29     .) :3ac1[1]
 ENDIF
     lda tmp_filev_ptr_save
@@ -6002,7 +6030,7 @@ ENDIF
     jmp oscli
 }
 
-IF FSN = ADFS
+IF FILE_SYSTEM = ADFS
 .run_ExileSR
     equs "/:0.ExileSR"
     equb cr
@@ -6015,11 +6043,11 @@ IF FSN = ADFS
     equs "$"
     equb cr
     equs "              "
-IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
-.adfs_1_txt
+IF RELOC_FILEV_PTR_TXT = TRUE OR RELOC_FILEV_PTR_SAVE = TRUE OR RELOC_FILEV_PTR_SAVE = NOP
+.reloc_adfs_txt
     equs "ADFS"
     equb cr
-.tape_1_txt
+.reloc_tape_txt
     equs "TAPE"
     equb cr
     equb   0
@@ -6027,7 +6055,7 @@ IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
     equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ENDIF
 
-ELIF FSN = NFS
+ELIF FILE_SYSTEM = NFS
 .run_ExileSR
     equs "/ExileSR"
     equb cr
@@ -6037,11 +6065,11 @@ ELIF FSN = NFS
 .catalogue_txt
     equs "CAT SAVES"
     equb cr
-IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
-.net_1_txt
+IF RELOC_FILEV_PTR_TXT = TRUE OR RELOC_FILEV_PTR_SAVE = TRUE OR RELOC_FILEV_PTR_SAVE = NOP
+.reloc_net_txt
     equs "NET"
     equb cr
-.tape_1_txt
+.reloc_tape_txt
     equs "TAPE"
     equb cr
     equb   0
@@ -6059,11 +6087,11 @@ ELSE
 .catalogue_txt
     equs "CAT 0"
     equb cr
-IF NOT(REMOVE_DEAD_CODE = TRUE AND FS_TAPE_SWITCH = FALSE)
-.disc_1_txt
+IF RELOC_FILEV_PTR_TXT = TRUE OR RELOC_FILEV_PTR_SAVE = TRUE OR RELOC_FILEV_PTR_SAVE = NOP
+.reloc_disc_txt
     equs "DISC"
     equb cr
-.tape_1_txt
+.reloc_tape_txt
     equs "TAPE"
     equb cr
     equb   0
@@ -7122,6 +7150,9 @@ ENDIF
 
 .end_of_reloc_code
 
+if end_of_reloc_code > &6000:ERROR "encroaching on screen RAM":endif
+PRINT &6000 - end_of_reloc_code,"byte(s) free"
+
     copyblock main_begin, end_of_reloc_code, code_start
     clear main_begin, code_start
     org code_start + (end_of_reloc_code - main_begin)
@@ -7167,7 +7198,7 @@ ENDIF
     ldx #3
     ldy #0
     jsr osbyte                                                                  ; Write Disable ESCAPE action, clear memory on BREAK, value X=3
-IF FSN <> NFS
+IF FILE_SYSTEM <> NFS
     lda #osbyte_issue_service_request
     ldx #&0c
     ldy #&ff
@@ -7181,7 +7212,7 @@ ENDIF
     ldx #0
     jsr osbyte                                                                  ; Implode character definition RAM, can redefine characters 128-159 (X=0)
 
-IF RELOC_ADDR = PAGE_17
+IF STATIC_FILEV_PTR_SAVE = TRUE
 ; 
 ; **************************************************************
 ; Save copy of file system vectors and reselect file system
@@ -7195,11 +7226,12 @@ IF RELOC_ADDR = PAGE_17
     sta tmp_fscv_ptr_save - main_begin + code_start
     lda fscv+1
     sta tmp_fscv_ptr_save + 1 - main_begin + code_start
-    ldx #<(tape_txt)
-    ldy #>(tape_txt)
+
+    ldx #<(static_tape_txt)
+    ldy #>(static_tape_txt)
     jsr oscli
-    ldx #<(disc_txt)
-    ldy #>(disc_txt)
+    ldx #<(static_fs_txt)
+    ldy #>(static_fs_txt)
     jsr oscli
 ENDIF
 ; 
@@ -7296,14 +7328,14 @@ ENDIF
     jmp relocation_run
 }
 
-IF RELOC_ADDR = PAGE_17
-.tape_txt
+IF STATIC_FILEV_PTR_TXT = TRUE OR STATIC_FILEV_PTR_SAVE = TRUE
+.static_tape_txt
     equs "TAPE"
     equb cr
-.disc_txt
-IF FSN = DFS
+.static_fs_txt
+IF FILE_SYSTEM = DFS
     equs "DISC"
-ELIF FSN = NFS
+ELIF FILE_SYSTEM = NFS
     equs "NET"
 ELSE
     equs "ADFS"
