@@ -1,65 +1,79 @@
-;RELOC_ADDR: Select either PAGE_15 or PAGE_17
+; VERSION: Select from one of the following options:
+; STH    Will build a version of the Loader that matches the Loader file from the STH archives
+; V1     Will build a version of the Loader that matches the hfe image Exile_D1S1_80T_HG3_2066CA7D_1.hfe
+; V2     Will build a version of the Loader that matches the hfe image Exile_D1S1_80T_HG3_EA8CECA2_1.hfe
+; V3     Will build a version of the Loader that matches the hfe image Exile_D1S2_80T_HG3_162468BD_1.hfe
+; MC     Will build a version of the Loader that matches the hfe image Exile_A6B2BE99.hfe
+; CUSTOM Will build a custom version of the Loader - Adjust CUSTOM settings below (after line: IF VERSION = CUSTOM)
+
+; RELOC_ADDR: Select either PAGE_15 or PAGE_17
+
+; FILE_SYSTEM: Select either DFS, NFS or ADFS
+
+; REMOVE_DEAD_CODE: Select either TRUE or FALSE
+
+; SWRAM_FE6x: Select either TRUE, FALSE or NOP
+; TRUE will include SWRAM FE6x code. NOP will replace SWRAM FE6x code with NOP instructions
+
+; DYN_MAP_DATA_ADDR: Select either TRUE or FALSE
+; FALSE will fix map_addr at &41e0. TRUE will allow map_addr to follow on from previous code
+
+; FILE_POINTER_SAVE: Select either IN_STATIC or IN_RELOC
+; IN_STATIC will locate code in static area of memory. IN_RELOC to locate code in relocated area of memory
+
+; RELOC_TOGGLE_FS_TXT: Select either TRUE or FALSE.
+; TRUE will issue *TAPE followed by *yyyy in relocated code area, where yyyy is either DFS, ADFS or NFS (as defined by FILE_SYSTEM)
+
+; RELOC_TOGGLE_FS: TRUE, FALSE or NOP
+; TRUE will include FS toggle code. NOP will replace toggle code with NOP instructions
+; If TRUE or NOP, text at .reloc_tape_txt will be generated, regardless of RELOC_TOGGLE_FS_TXT setting.
+
+; STATIC_TOGGLE_FS_TXT: Select either TRUE or FALSE.
+; TRUE will issue *TAPE followed by *yyyy in static code area, where yyyy is either DFS, ADFS or NFS (as defined by FILE_SYSTEM)
+
+; STATIC_TOGGLE_FS: TRUE or FALSE
+; TRUE will include FS toggle code
+; If TRUE, text at .reloc_tape_txt will be generated, regardless of RELOC_TOGGLE_FS_TXT setting.
+
+; UNREF_DATA: Select either FALSE, DATA_STH_V1, DATA_V2_V3 or DATA_MC
+; Will add selected unreferenced data block.
+
+; KEEP_FINAL_JMP: TRUE or FALSE
+
+
+    org &3000
+{
+; 
+; *****************************************************************************
+; For standalone assembling remove comments from this section.
+; Modify the VERSION = line as required, and adjust the CUSTOM table setting to
+; match your requirements.
+; Otherwise these variables should be commented out, as they are defined in the
+; calling file.
+; *****************************************************************************
+;
+; STH = 0
+; V1 = 1
+; V2 = 2
+; V3 = 3
+; MC = 4
+; CUSTOM = 5
+
+; VERSION = V3
+
+; IF (VERSION < STH OR VERSION > CUSTOM):ERROR "Incorrect Source Version Option Selected":ENDIF
+
 PAGE_15 = 0
 PAGE_17 = 1
-
-;FILE_SYSTEM: Select the file system to build for
-DFS  = 0  ; This will build the original loader file that works with DFS
-NFS  = 1  ; This will build a loader file that works with Econet.
-ADFS = 2  ; This will build a loader file that works with ADFS
-
-;REMOVE_DEAD_CODE: Select TRUE to strip out redundant code
-; TRUE = -1
-; FALSE = 0
-
-;SWRAM_FE6x: TRUE, FALSE or NOP
-; TRUE = -1
-; FALSE = 0
+DFS = 0
+NFS = 1
+ADFS = 2
 NOP = 1
-
-;DYN_MAP_DATA_ADDR: FALSE to set map_addr at &41e0. TRUE to follow on from previous code
-; TRUE = -1
-; FALSE = 0
-
-;FILE_POINTER_SAVE: IN_STATIC to locate code in static area of memory. IN_RELOC to locate code in relocated area of memory
 IN_STATIC = 0
 IN_RELOC = 1
-
-;RELOC_TOGGLE_FS_TXT: TRUE or FALSE. Overridden (TRUE) if RELOC_TOGGLE_FS is set to TRUE or NOP.
-; TRUE = -1
-; FALSE = 0
-
-;RELOC_TOGGLE_FS: TRUE, FALSE or NOP. If TRUE or NOP, text at .reloc_tape_txt will be generated, regardless of RELOC_TOGGLE_FS_TXT setting..
-; TRUE = -1
-; FALSE = 0
-; NOP = 1
-
-;STATIC_FILEV_PTR_SAVE: TRUE or FALSE
-; TRUE = -1
-; FALSE = 0
-
-;STATIC_TOGGLE_FS_TXT: TRUE or FALSE. Overridden (TRUE) if STATIC_FILEV_PTR_SAVE is set to TRUE.
-; TRUE = -1
-; FALSE = 0
-
-;STATIC_TOGGLE_FS: TRUE or FALSE. If TRUE, text at .reloc_tape_txt will be generated, regardless of STATIC_TOGGLE_FS_TXT setting..
-; TRUE = -1
-; FALSE = 0
-
-;KEEP_FINAL_JMP: TRUE or FALSE
-; TRUE = -1
-; FALSE = 0
-
-;VERSION: Select the source build file
-STH    = 0  ; Based on the Loader file from the STH archives
-V1     = 1  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_2066CA7D_1.hfe
-V2     = 2  ; Based on the Loader file from the hfe image Exile_D1S1_80T_HG3_EA8CECA2_1.hfe
-V3     = 3  ; Based on the Loader file from the hfe image Exile_D1S2_80T_HG3_162468BD_1.hfe
-MC     = 4  ; Based on the Loader file from the hfe image Exile_A6B2BE99.hfe
-CUSTOM = 5  ; Custom build - Adjust CUSTOM settings below (after line: IF VERSION = CUSTOM)
-
-VERSION = V3
-
-IF (VERSION < STH OR VERSION > CUSTOM):ERROR "Incorrect Source Version Option Selected":ENDIF
+DATA_STH_V1 = 1
+DATA_V2_V3 = 2
+DATA_MC = 3
 
 IF VERSION = STH
 RELOC_ADDR = PAGE_15
@@ -72,6 +86,7 @@ STATIC_TOGGLE_FS_TXT = FALSE
 STATIC_TOGGLE_FS = FALSE
 RELOC_TOGGLE_FS_TXT = TRUE
 RELOC_TOGGLE_FS = NOP
+UNREF_DATA = DATA_STH_V1
 KEEP_FINAL_JMP = TRUE
 
 ELIF VERSION = V1
@@ -85,6 +100,7 @@ STATIC_TOGGLE_FS_TXT = FALSE
 STATIC_TOGGLE_FS = FALSE
 RELOC_TOGGLE_FS_TXT = TRUE
 RELOC_TOGGLE_FS = TRUE
+UNREF_DATA = DATA_STH_V1
 KEEP_FINAL_JMP = FALSE
 
 ELIF VERSION = V2 OR VERSION = V3
@@ -98,6 +114,7 @@ STATIC_TOGGLE_FS_TXT = TRUE
 STATIC_TOGGLE_FS = TRUE
 RELOC_TOGGLE_FS_TXT = TRUE
 RELOC_TOGGLE_FS = FALSE
+UNREF_DATA = DATA_V2_V3
 KEEP_FINAL_JMP = FALSE
 
 ELIF VERSION = MC
@@ -111,6 +128,7 @@ STATIC_TOGGLE_FS_TXT = FALSE
 STATIC_TOGGLE_FS = FALSE
 RELOC_TOGGLE_FS_TXT = TRUE
 RELOC_TOGGLE_FS = TRUE
+UNREF_DATA = DATA_MC
 KEEP_FINAL_JMP = FALSE
 
 ELIF VERSION = CUSTOM
@@ -124,8 +142,14 @@ STATIC_TOGGLE_FS_TXT = FALSE
 STATIC_TOGGLE_FS = FALSE
 RELOC_TOGGLE_FS_TXT = FALSE
 RELOC_TOGGLE_FS = FALSE
+UNREF_DATA = FALSE
 KEEP_FINAL_JMP = FALSE
 ENDIF
+; 
+; *****************************************************************************
+; End of standalone assembly section
+; *****************************************************************************
+;
 
 IF NOT(RELOC_ADDR = PAGE_15 OR RELOC_ADDR = PAGE_17):ERROR "Incorrect RELOC_ADDR Option Selected":ENDIF
 IF (FILE_SYSTEM < DFS OR FILE_SYSTEM > ADFS):ERROR "Incorrect FILE_SYSTEM Option Selected":ENDIF
@@ -137,6 +161,7 @@ IF NOT(STATIC_TOGGLE_FS_TXT = TRUE OR STATIC_TOGGLE_FS_TXT = FALSE):ERROR "Incor
 IF NOT(STATIC_TOGGLE_FS = TRUE OR STATIC_TOGGLE_FS = FALSE):ERROR "Incorrect STATIC_TOGGLE_FS Option Selected":ENDIF
 IF NOT(RELOC_TOGGLE_FS_TXT = TRUE OR RELOC_TOGGLE_FS_TXT = FALSE):ERROR "Incorrect RELOC_TOGGLE_FS_TXT Option Selected":ENDIF
 IF NOT(RELOC_TOGGLE_FS = TRUE OR RELOC_TOGGLE_FS = FALSE OR RELOC_TOGGLE_FS = NOP):ERROR "Incorrect RELOC_TOGGLE_FS Option Selected":ENDIF
+IF (UNREF_DATA < FALSE OR UNREF_DATA > DATA_MC):ERROR "Incorrect UNREF_DATA Option Selected":ENDIF
 IF NOT(KEEP_FINAL_JMP = TRUE OR KEEP_FINAL_JMP = FALSE):ERROR "Incorrect KEEP_FINAL_JMP Option Selected":ENDIF
 
 ; Constants
@@ -146,6 +171,7 @@ crtc_scan_lines_per_char                           = 9
 crtc_screen_start_high                             = 12
 crtc_screen_start_low                              = 13
 lf                                                 = 10
+maxBank                                            = 15
 max_char_value                                     = 127
 max_number_of_chars                                = 14
 min_char_value                                     = 32
@@ -172,6 +198,7 @@ osword_read_line                                   = 0
 screen_size_pages                                  = 40
 screen_width                                       = 64
 spc                                                = 32
+swram_bank_size                                    = 16384
 
 screen_base_page = &80 - screen_size_pages
 
@@ -296,6 +323,7 @@ l04a0                           = &04a0
 l08a0                           = &08a0
 save_data_table                 = &2c00
 l59e0                           = &59e0
+swram_base_addr                 = &8000
 crtc_address_register           = &fe00
 crtc_address_write              = &fe01
 video_ula_palette               = &fe21
@@ -316,8 +344,6 @@ oswrch                          = &ffee
 osword                          = &fff1
 osbyte                          = &fff4
 oscli                           = &fff7
-
-    org &3000
 
 .code_start
 
@@ -902,10 +928,7 @@ ENDIF
     equb &43, &84,   4, &83, &82, &82, &0d, &0d, &46,   6,   6,   6,   6, &45, &45, &45
     equb   6,   7, &89,   9, &8a, &4a, &4a, &ca, &ca, &4a,   0,   0,   0, &48,   8, &82
     equb &82, &82,   2, &c4, &c4, &0b, &0b, &0b, &d1, &91, &d1, &d1, &91, &91,   0
-; 
-; **************************************************************
-; **************************************************************
-; 
+
 .table_01
     ;; background_strip_cache_orientation???
     ;; background_strip_cache_sprite???
@@ -1373,10 +1396,10 @@ ENDIF
 ;; 
 ;; ##############################################################################; 
 
-; **************************************************************
+; ; *****************************************************************************
 ; background_objects_data
 ; &80 set = not in current stack
-; **************************************************************
+; ; *****************************************************************************
 ; 
 .background_objects_data
     ;;  &80 set = not in current stack
@@ -3094,8 +3117,9 @@ ENDIF
     rts
 
 .test_for_swram
-    ldx #&0f
-.c2889
+{
+    ldx #maxBank
+.loop_01
     lda #&0f
 
 IF SWRAM_FE6x = TRUE
@@ -3108,37 +3132,37 @@ ENDIF
 
     stx lfe32
     stx romsel
-    ldy #0
+    ldy #<swram_base_addr
     sty zp_various_1b
-    lda #&80
+    lda #>swram_base_addr
     sta zp_various_1c
-.c289f
+.loop_02
     lda (zp_various_1b),y
     sta zp_various_b
-    lda #&aa
+    lda #%10101010
     sta (zp_various_1b),y
     cmp (zp_various_1b),y
-    bne c28c3
-    lda #&55
+    bne test_next_bank
+    lda #%01010101
     sta (zp_various_1b),y
     cmp (zp_various_1b),y
-    bne c28c3
+    bne test_next_bank
     lda zp_various_b
     sta (zp_various_1b),y
     iny
-    bne c289f
+    bne loop_02
     inc zp_various_1c
     lda zp_various_1c
-    cmp #&c0
-    bcc c289f
+    cmp #>(swram_base_addr + swram_bank_size)
+    bcc loop_02
     rts
 
-.c28c3
+.test_next_bank
     dex
-    bpl c2889
+    bpl loop_01
     clc
-.c28c7
     rts
+}
 
 .table_02
     equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -3155,7 +3179,7 @@ ENDIF
     ldx #&18
     lda #0
 .loop_c28f4
-    sta c28c7,x
+    sta table_02 - 1,x
     dex
     bne loop_c28f4
     ldy #3
@@ -5145,10 +5169,10 @@ ENDIF
 }
 
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Write text to screen. On entry X & Y contains pointer to text.
 ; Text is terminated with 0.
-; **************************************************************
+; ; *****************************************************************************
 ; 
 .print_txt
 {
@@ -5247,9 +5271,9 @@ ELIF RELOC_TOGGLE_FS = NOP
 ENDIF
     jsr sub_c2aad
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Switch to Mode 6
-; **************************************************************
+; ; *****************************************************************************
 ; 
     lda #&16
     jsr nvwrch                         ; Write character 22
@@ -6557,8 +6581,7 @@ ENDIF
 .handle_explosion
     rts
 
-IF REMOVE_DEAD_CODE = FALSE
-IF VERSION = V2 OR VERSION = V3
+IF UNREF_DATA = DATA_V2_V3
 ; unreferenced data
     equb &2c, &d7, &3a, &65, &2c, &e5, &3a, &c9, &35, &c7, &3a, &e1, &33, &f3, &3a, &ff
     equb &ff
@@ -6573,7 +6596,7 @@ IF VERSION = V2 OR VERSION = V3
     equs "Save position"
     equb 0
     equs "Default posi"
-ELIF VERSION = MC
+ELIF UNREF_DATA = DATA_MC
 ; unreferenced data
     equb &3a, &20, &31, &34, &4c, &84, &39, &c9,   1, &d0, &0a, &a2, &85, &a0, &3a, &20
     equb &31, &34, &4c, &84, &39, &c9,   2, &d0, &0a, &a2, &8f, &a0, &3a, &20, &31, &34
@@ -6595,7 +6618,7 @@ ELIF VERSION = MC
     equs "Score Breakdown"
     equb 0
     equs "Lo"
-ELSE
+ELIF UNREF_DATA = DATA_STH_V1
 ; unreferenced data
     equb &48, &11, &38, &91, &90, &0c, &3a, &8f, &68, &72, &88, &8c, &87, &8f, &96,   8
     equb &97,   6, &ff, &a1, &6d, &f1, &64, &98, &e0, &7a,   8, &28, &d3, &8c, &17, &66
@@ -6638,7 +6661,6 @@ ELSE
     equs "Score Breakdown"
     equb 0
     equs "Lo"
-ENDIF
 ENDIF
 
 IF DYN_MAP_DATA_ADDR = FALSE
@@ -7170,7 +7192,7 @@ PRINT &6000 - end_of_reloc_code,"byte(s) free"
 .start_addr
 {
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Loader starting point...
 ;
 ; Reset vectors.
@@ -7178,7 +7200,7 @@ PRINT &6000 - end_of_reloc_code,"byte(s) free"
 ; 
 ; Pointer to default vector table stored at &FFB7
 ; https://tobylobster.github.io/mos/mos/S-s10.html#SP1
-; **************************************************************
+; ; *****************************************************************************
 ; 
     cld
     sei
@@ -7195,14 +7217,14 @@ PRINT &6000 - end_of_reloc_code,"byte(s) free"
     bne loop_c72ee
     cli
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Initialisation
 ; Note: Claiming NMI at this point prevents the loader from
 ;       being able to load the main game files from Econet, so
 ;       if running the game from Econet this claim should be
 ;       disabled, and instead should be implemented at the very
 ;       start of the main game files EliteB or EliteMC
-; **************************************************************
+; ; *****************************************************************************
 ; 
     lda #osbyte_read_write_escape_break_effect
     ldx #3
@@ -7212,7 +7234,7 @@ IF FILE_SYSTEM <> NFS
     lda #osbyte_issue_service_request
     ldx #&0c
     ldy #&ff
-    jsr osbyte                                                                            ; Issue paged ROM service call, Reason X=12 - NMI claim
+    jsr osbyte                                                                  ; Issue paged ROM service call, Reason X=12 - NMI claim
 ENDIF
     lda #osbyte_read_tube_presence
     ldx #0
@@ -7224,9 +7246,9 @@ ENDIF
 
 IF FILE_POINTER_SAVE = IN_STATIC
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Save copy of file system vectors and reselect file system
-; **************************************************************
+; ; *****************************************************************************
 ; 
     lda filev
     sta tmp_filev_ptr_save - main_begin + code_start
@@ -7247,11 +7269,11 @@ IF STATIC_TOGGLE_FS = TRUE
     jsr oscli
 ENDIF
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Relocate &400 bytes of save data from previous game.
 ; Game data is left between &2C00..&3000.
 ; Note that the code at &2C00 is NOT part of this loader.
-; **************************************************************
+; ; *****************************************************************************
 ; 
     lda #<save_data_table
     sta zp_various_1b
@@ -7259,11 +7281,11 @@ ENDIF
     sta zp_various_1c
     jsr relocate_data_to_page_4
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Doing some checksum test for valid save data at &2C00 and
 ; saves the result to zp_0. If valid data is not found, then
 ; loader will report 'default' instead of 'unsaved'
-; **************************************************************
+; ; *****************************************************************************
 ; 
     lda #1
     sta l351f - main_begin + code_start
@@ -7298,10 +7320,10 @@ ENDIF
     cld
 ;ENDIF
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Relocate code from &3000..&72df to &1700..&59df or
 ; Relocate code from &3000..&74df to &1500..&59df
-; **************************************************************
+; ; *****************************************************************************
 ; 
 .main_game_relocation
     lda code_start
@@ -7322,9 +7344,9 @@ ENDIF
     cmp #>start_addr
     bne main_game_relocation
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Clear zero pages addresses &00..&8f
-; **************************************************************
+; ; *****************************************************************************
 ; 
     lda #0
     ldx #&8f
@@ -7333,9 +7355,9 @@ ENDIF
     dex
     bne loop_c73ab
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; And jump to relocated code
-; **************************************************************
+; ; *****************************************************************************
 ; 
     jmp relocation_run
 }
@@ -7356,9 +7378,9 @@ ENDIF
 ENDIF
 
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Subroutine to relocate 4 pages of data from (&1B) to &400
-; **************************************************************
+; ; *****************************************************************************
 ; 
 .relocate_data_to_page_4
 {
@@ -7380,9 +7402,9 @@ ENDIF
 }
 
 ; 
-; **************************************************************
+; ; *****************************************************************************
 ; Unused jump left over from decryption code
-; **************************************************************
+; ; *****************************************************************************
 ; 
 IF KEEP_FINAL_JMP = TRUE
     jmp code_start
@@ -7400,3 +7422,4 @@ print "File Length:", ~(code_end-code_start)
 print "Execute Address:", ~start_addr
 
 save "ExileL", code_start, code_end
+}
