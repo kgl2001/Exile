@@ -7105,6 +7105,8 @@ ENDIF
     equb &63, &3b, &63, &0b, &2b, &2b, &2b, &2b, &2b, &2b, &b2, &ca, &ca, &ca, &ca, &ea
     equb &ea
 
+.end_of_valid_reloc_code
+
 ;; ##############################################################################
 ;; 
 ;; Unknown data.
@@ -7181,8 +7183,8 @@ ENDIF
 
 .end_of_reloc_code
 
-if end_of_reloc_code > (screen_base_page * &100):ERROR "encroaching on screen RAM":endif
-PRINT "Loader reloc code has", (screen_base_page * &100) - end_of_reloc_code,"byte(s) free"
+if end_of_valid_reloc_code > (screen_base_page * &100):ERROR "encroaching on screen RAM":endif
+PRINT "Loader reloc code has", (screen_base_page * &100) - end_of_valid_reloc_code,"byte(s) free"
 
     copyblock main_begin, end_of_reloc_code, code_start
     clear main_begin, code_start
