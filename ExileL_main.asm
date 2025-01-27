@@ -6866,7 +6866,6 @@ ENDIF
 ;;    Sprite data is 128 x 128, 20 bytes per row.
 ;; 
 ;; ##############################################################################
-
 .sprite_data
     equb &c0,   0,   0,   0, &32, &11, &80, &10,   0,   0,   0, &20,   6,   8,   0,   0,   1, &8c,   0, &66, &80,   0,   0,   0,   1,   2,   8, &64, &90, &80,   0, &66
     equb &8c,   0,   0,   0, &56, &a3, &c0, &ca,   0,   0,   0,   7, &2d, &66,   0,   0,   0,   0,   0, &60, &c0,   0,   0,   0,   1, &0b, &88, &42, &f0, &3e, &64, &4c
@@ -7182,8 +7181,8 @@ ENDIF
 
 .end_of_reloc_code
 
-if end_of_reloc_code > &6000:ERROR "encroaching on screen RAM":endif
-PRINT &6000 - end_of_reloc_code,"byte(s) free"
+if end_of_reloc_code > (screen_base_page * &100):ERROR "encroaching on screen RAM":endif
+PRINT "Loader reloc code has", (screen_base_page * &100) - end_of_reloc_code,"byte(s) free"
 
     copyblock main_begin, end_of_reloc_code, code_start
     clear main_begin, code_start
@@ -7421,5 +7420,5 @@ print "Load Address:", ~code_start
 print "File Length:", ~(code_end-code_start)
 print "Execute Address:", ~start_addr
 
-save "ExileL", code_start, code_end
+save "ExileL", code_start, code_end, start_addr
 }
