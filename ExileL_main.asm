@@ -508,24 +508,18 @@ ENDIF
     equb &ef, &ab, &ad, &95, &9c, &91, &92, &a6, &91, &b1, &8e, &e0, &a2, &b5, &b3, &e3; 50
     equb &d5, &e3, &d7, &f0, &71; 60
 
-.l17ca
-    ;;  ???
-    ;;     0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
-    equb &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e; 00
-    equb &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e; 10
-    equb &2e, &2e, &2e, &2e, &2e; 20
-
-.object_gravity_flags
-    ;;  & &80 = doesn't collide with other objects
-    ;;  & &07 = weight; 01 = light, 06 = heavy, 07 = static
-    ;;     0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f
-    equb &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &f0, &c8, &3c, &28, &28, &3c, &3c; 00
-    equb   3,   8,   8,   8, &0c, &18, &28, &3c, &28, &50, &28,   8, &78,   8, &20, &10; 10
-    equb &14, &1c, &0c, &20, &50, &30, &64, &28, &3c, &50, &78, &a0, &28, &28, &3c, &50; 20
-    equb &50, &3c, &3c, &3c, &3c, &3c, &50,   2,   3,   4,   5,   7,   8, &0a, &0f, &10; 30
-    equb &11, &1a, &1b, &1c, &1d, &1e, &1f, &20, &21, &27, &28, &29, &2a, &2b, &2c, &2d; 40
-    equb &2e, &2f, &30, &31, &51, &52, &53, &54, &56, &57, &59, &5a, &5b, &5c, &5d, &5e; 50
-    equb &5f, &60, &61, &62, &63; 60
+.table_01a
+    equb &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e
+    equb &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e
+    equb &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e, &2e
+.table_01b
+    equb &f0, &c8, &3c, &28, &28, &3c, &3c,   3,   8,   8,   8, &0c, &18, &28, &3c, &28
+    equb &50, &28,   8, &78,   8, &20, &10, &14, &1c, &0c, &20, &50, &30, &64, &28, &3c
+    equb &50, &78, &a0, &28, &28, &3c, &50, &50, &3c, &3c, &3c, &3c, &3c, &50
+.table_01c
+    equb   2,   3,   4,   5,   7,   8, &0a, &0f, &10, &11, &1a, &1b, &1c, &1d, &1e, &1f
+    equb &20, &21, &27, &28, &29, &2a, &2b, &2c, &2d, &2e, &2f, &30, &31, &51, &52, &53
+    equb &54, &56, &57, &59, &5a, &5b, &5c, &5d, &5e, &5f, &60, &61, &62, &63
 
 .object_handler_table
     ;; for background objects / explosions
@@ -929,7 +923,7 @@ ENDIF
     equb   6,   7, &89,   9, &8a, &4a, &4a, &ca, &ca, &4a,   0,   0,   0, &48,   8, &82
     equb &82, &82,   2, &c4, &c4, &0b, &0b, &0b, &d1, &91, &d1, &d1, &91, &91,   0
 
-.table_01
+.table_02
     ;; background_strip_cache_orientation???
     ;; background_strip_cache_sprite???
     equb &2e, &2e, &2e, &2e, &2e, &2e, &2e
@@ -3164,14 +3158,14 @@ ENDIF
     rts
 }
 
-.table_02
+.table_03
     equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 .sub_c28e0
-    asl table_02 + 16
-    rol table_02 + 17
-    rol table_02 + 18
-    rol table_02 + 19
+    asl table_03 + 16
+    rol table_03 + 17
+    rol table_03 + 18
+    rol table_03 + 19
     rts
 
 .sub_c28ed
@@ -3179,21 +3173,21 @@ ENDIF
     ldx #&18
     lda #0
 .loop_c28f4
-    sta table_02 - 1,x
+    sta table_03 - 1,x
     dex
     bne loop_c28f4
     ldy #3
 .loop_c28fc
     lda player_deaths - 1,y
-    sta table_02 + 15,y
+    sta table_03 + 15,y
     dey
     bne loop_c28fc
-    sty table_02 + 19
+    sty table_03 + 19
     ldx #2
 .c290a
     ldy #3
 .loop_c290c
-    lda table_02 + 16,y
+    lda table_03 + 16,y
     pha
     dey
     bpl loop_c290c
@@ -3214,7 +3208,7 @@ ENDIF
     ldy #4
 .loop_c2931
     lda this_object_sprite_old,y
-    sta table_02 + 11,y
+    sta table_03 + 11,y
     dey
     bne loop_c2931
     ldx #4
@@ -3287,16 +3281,16 @@ ENDIF
 .c29aa
     txa
     pha
-    lda object_gravity_flags + 55,x
+    lda table_01c,x
     jsr sub_c2ac8
     pla
     tax
-    lda l17ca,x
+    lda table_01a,x
     sec
     sbc l2ac6
     bcc c29fa
     sta zp_various_b
-    lda object_gravity_flags + 9,x
+    lda table_01b,x
     jsr sub_c2a4a
     ldy #2
 .loop_c29c7
@@ -3314,7 +3308,7 @@ ENDIF
     sta l001e
     dey
     bne loop_c29c7
-    lda object_gravity_flags + 55,x
+    lda table_01c,x
     stx zp_various_b
     ldx #0
     cmp #4
@@ -3330,7 +3324,7 @@ ENDIF
     jsr c2a8c
 .c29fa
     inx
-    cpx #&2e
+    cpx #table_01b - table_01a
     bne c29aa
     ldx #0
     jsr sub_c2a28
@@ -3342,12 +3336,12 @@ ENDIF
     jsr sub_c2a39
     ldx #&10
     jsr sub_c2a39
-    lda table_02 + 23
+    lda table_03 + 23
     bpl c2a27
     ldx #4
     lda #0
 .loop_c2a21
-    sta table_02 + 19,x
+    sta table_03 + 19,x
     dex
     bne loop_c2a21
 .c2a27
@@ -3357,9 +3351,9 @@ ENDIF
     clc
     ldy #&fc
 .loop_c2a2b
-    lda table_02 - 232,y
-    adc table_02,x
-    sta table_02 - 232,y
+    lda table_03 - 232,y
+    adc table_03,x
+    sta table_03 - 232,y
     inx
     iny
     bne loop_c2a2b
@@ -3369,9 +3363,9 @@ ENDIF
     sec
     ldy #&fc
 .loop_c2a3c
-    lda table_02 - 232,y
-    sbc table_02,x
-    sta table_02 - 232,y
+    lda table_03 - 232,y
+    sbc table_03,x
+    sta table_03 - 232,y
     inx
     iny
     bne loop_c2a3c
@@ -3419,33 +3413,33 @@ ENDIF
     bpl c2a8c
 .c2a8c
     clc
-    adc table_02,x
-    sta table_02,x
+    adc table_03,x
+    sta table_03,x
     tya
-    adc table_02 + 1,x
-    sta table_02 + 1,x
+    adc table_03 + 1,x
+    sta table_03 + 1,x
     lda #0
-    adc table_02 + 2,x
-    sta table_02 + 2,x
+    adc table_03 + 2,x
+    sta table_03 + 2,x
     lda #0
-    adc table_02 + 3,x
-    sta table_02 + 3,x
+    adc table_03 + 3,x
+    sta table_03 + 3,x
     ldx zp_various_b
     rts
 
-.sub_c2aad
+.update_table_01a
     ldx #0
 .loop_c2aaf
     txa
     pha
-    lda object_gravity_flags + 55,x
+    lda table_01c,x
     jsr sub_c2ac8
     pla
     tax
     lda l2ac6
-    sta l17ca,x
+    sta table_01a,x
     inx
-    cpx #&2e
+    cpx #table_01b - table_01a
     bne loop_c2aaf
     rts
 
@@ -4121,7 +4115,7 @@ ENDIF
     sta l0062
     ldy #4
 .loop_c2e0e
-    lda table_01 + 6,y
+    lda table_02 + 6,y
     sta this_object_sprite_old,y
     dey
     bne loop_c2e0e
@@ -4159,7 +4153,7 @@ ENDIF
     sta l0062
     ldy #4
 .loop_c2e4f
-    lda table_02 + 19,y
+    lda table_03 + 19,y
     sta this_object_sprite_old,y
     dey
     bne loop_c2e4f
@@ -4303,18 +4297,18 @@ ENDIF
     jsr sub_c2fc5
     jsr sub_c2fc5
     adc l0061
-    adc table_02 + 20
+    adc table_03 + 20
     sta l0061
     adc keys_collected + 3
     clc
     adc l0060
-    adc table_02 + 21
+    adc table_03 + 21
     sta l0060
     adc l005f
-    adc table_02 + 22
+    adc table_03 + 22
     sta l005f
     adc zp_5e
-    adc table_02 + 23
+    adc table_03 + 23
     sta zp_5e
     adc keys_collected + 4
     jsr sub_c2fc5
@@ -4641,7 +4635,7 @@ ENDIF
     sta zp_various_1c
     lda #4
     sta l31a2 + 2                      ; self modifying code
-    lda #>table_01
+    lda #>table_02
     sta l31a5 + 2                      ; self modifying code
     sec
     sed
@@ -4656,7 +4650,7 @@ ENDIF
 .l31a2
     eor l0400,y
 .l31a5
-    sta table_01,y
+    sta table_02,y
     eor zp_various_b
     iny
     bne c31b3
@@ -4676,13 +4670,13 @@ ENDIF
     bne c31f0
     ldx #&a6
     ldy #&fc
-    lda #<table_01
+    lda #<table_02
     sta l31da + 1                      ; self modifying code
-    lda #>table_01
+    lda #>table_02
     sta l31da + 2                      ; self modifying code
     lda #&dc
 .l31da
-    eor table_01
+    eor table_02
     inc l31da + 1                      ; self modifying code
     bne c31e5
     inc l31da + 2                      ; self modifying code
@@ -5269,7 +5263,7 @@ ELIF RELOC_TOGGLE_FS = NOP
     nop:nop
     nop:nop:nop
 ENDIF
-    jsr sub_c2aad
+    jsr update_table_01a
 ; 
 ; ; *****************************************************************************
 ; Switch to Mode 6
@@ -5386,7 +5380,7 @@ ENDIF
     tax
     ldy #&fc
 .loop_c3631
-    lda table_02,x
+    lda table_03,x
     sta [(zp_5e - &fc) AND &ffff],y
     inx
     iny
