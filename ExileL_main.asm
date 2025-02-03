@@ -3749,8 +3749,8 @@ ENDIF
 IF FILE_SYSTEM = ADFS
 .directory_txt
     equb &11, &21, cr, lf
-    equs "Directory?"
-    equb cr, lf, lf, &3f, &11, &77,   0
+    equs "Directory?", cr
+    equb lf, lf, &3f, &11, &77,   0
 .drive_txt
     equb &11, &21, cr, lf
     equs "Drive?"
@@ -3912,15 +3912,13 @@ ENDIF
     brk
 
     equb 0
-    equs "Bad file"
-    equb 0
+    equs "Bad file", 0
 
 .not_found_error
     brk
 
     equb 0
-    equs "Not found"
-    equb 0
+    equs "Not found", 0
 
 .load_file
     jsr copy_load_table_to_osfile_control_block
@@ -3972,24 +3970,22 @@ ENDIF
 .load_filename_txt
     equb &11, &21
     equb lf
-    equs "Load Filename? "
-    equb cr, lf, lf
-    equs "?"
-    equb 0
+    equs "Load Filename? ", cr
+    equb lf, lf
+    equs "?", 0
 .save_filename_txt
     equb &11, &21
     equb lf
-    equs "Save Filename? "
-    equb cr, lf, lf
-    equs "?"
-    equb 0
+    equs "Save Filename? ", cr
+    equb lf, lf
+    equs "?", 0
  
 IF FILE_SYSTEM = ADFS 
 .insert_own_disc_txt
     equb &11, &33
 .l2bf9
-    equs "Insert your own disc"
-    equb cr, lf
+    equs "Insert your own disc", cr
+    equb lf
     equs "and press RETURN"
     equb lf, cr
     equb 0
@@ -3999,8 +3995,8 @@ IF FILE_SYSTEM = ADFS
     equb &11, &33
     equs "EXILE "
     equb &11, &23
-    equs "disc"
-    equb cr, lf
+    equs "disc", cr
+    equb lf
     equs "and press RETURN"
     equb lf, lf, cr
     equb 0
@@ -5037,8 +5033,7 @@ IF FILE_SYSTEM = ADFS
     equb cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr, cr
     equb cr, cr, cr
 .osfile_path
-    equs ":0.$"
-    equb cr
+    equs ":0.$", cr
     equs "                              "
 .osfile_path_pointer
     equb 1
@@ -5139,8 +5134,7 @@ ENDIF
     brk
 
     equb 0
-    equs "Escape"
-    equb 0
+    equs "Escape", 0
 }
 
 .sub_c34de
@@ -5408,8 +5402,7 @@ ENDIF
 
 .score_breakdown_2_txt
     equb &11, &61
-    equs "Score Breakdown:"
-    equb 0
+    equs "Score Breakdown:", 0
 
 .score_breakdown_pointer_table
     equw   kills_plus_txt
@@ -5421,32 +5414,26 @@ ENDIF
 
 .kills_plus_txt
     equb &11, &31
-    equs "Kills  +"
-    equb 0
+    equs "Kills  +", 0
 
 .kills_minus_txt
     equb &11, &1c
-    equs "Kills  -"
-    equb 0
+    equs "Kills  -", 0
 
 .bonuses_plus_txt
     equb &11, &31
-    equs "Bonuses  +"
-    equb 0
+    equs "Bonuses  +", 0
 
 .time_minus_txt
     equb &11, &1c
-    equs "Time  -"
-    equb 0
+    equs "Time  -", 0
 
 .deaths_minus_txt
-    equs "Deaths  -"
-    equb 0
+    equs "Deaths  -", 0
 
 .total_txt
     equb &0a, &11, &77
-    equs "Total      "
-    equb 0
+    equs "Total      ", 0
 
 .show_status_code
 {
@@ -5648,18 +5635,15 @@ ENDIF
 
 .fuel_txt
     equb &11, &6a
-    equs "Fuel"
-    equb 0
+    equs "Fuel", 0
 
 .pockets_txt
     equb &11, &5a
-    equs "Pockets"
-    equb 0
+    equs "Pockets", 0
 
 .keys_txt
     equb &11, &5a
-    equs "Keys"
-    equb 0
+    equs "Keys", 0
 
 .keys_banner_txt
     equb &11, &31, &84, &11,   1, &89, &89, &89, &89, &89, &87, &11, &31, &85
@@ -5931,59 +5915,47 @@ ENDIF
     equb &ff, &ff
 
 .run_game_txt
-    equs "Run Game"
-    equb 0
+    equs "Run Game", 0
 
 .show_status_txt
-    equs "Status"
-    equb 0
+    equs "Status", 0
 
 .score_breakdown_txt
-    equs "Score Breakdown"
-    equb 0
+    equs "Score Breakdown", 0
 
 .load_position_txt
-    equs "Load position"
-    equb 0
+    equs "Load position", 0
 
 .save_position_txt
-    equs "Save position"
-    equb 0
+    equs "Save position", 0
 
 .restore_defaults_txt
-    equs "Default position"
-    equb 0
+    equs "Default position", 0
 
 .show_position_txt
-    equs "See position"
-    equb 0
+    equs "See position", 0
 
 .show_catalogue_txt
-    equs "Catalogue"
-    equb 0
+    equs "Catalogue", 0
 
 .newline_txt
     equb cr, lf,   0
 
 .default1_txt
     equb &11, &17
-    equs "Default"
-    equb 0
+    equs "Default", 0
 
 .unsaved_txt
     equb &11, &6a
-    equs "Unsaved"
-    equb 0
+    equs "Unsaved", 0
 
 .file1_txt
     equb &11, &21
-    equs "File: ", '"'
-    equb 0
+    equs "File: ", '"', 0
 
 .file2_txt
     equb &11, &21
-    equs "File: ", '"'
-    equb 0
+    equs "File: ", '"', 0
 
 .filename_table_txt
     equs "................"
@@ -6060,24 +6032,19 @@ ENDIF
 
 IF FILE_SYSTEM = ADFS
 .run_ExileSR
-    equs "/:0.ExileSR"
-    equb cr
+    equs "/:0.ExileSR", cr
 .run_ExileB
-    equs "/:0.ExileB"
-    equb cr
+    equs "/:0.ExileB", cr
 .catalogue_txt
     equs "CAT:0."
 .directory_name_txt
-    equs "$"
-    equb cr
+    equs "$", cr
     equs "              "
 IF RELOC_TOGGLE_FS_TXT = TRUE OR RELOC_TOGGLE_FS = TRUE OR RELOC_TOGGLE_FS = NOP
 .reloc_adfs_txt
-    equs "ADFS"
-    equb cr
+    equs "ADFS", cr
 .reloc_tape_txt
-    equs "TAPE"
-    equb cr
+    equs "TAPE", cr
     equb   0
     equw osfile_control_block
     equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -6085,21 +6052,16 @@ ENDIF
 
 ELIF FILE_SYSTEM = NFS
 .run_ExileSR
-    equs "/ExileSR"
-    equb cr
+    equs "/ExileSR", cr
 .run_ExileB
-    equs "/ExileB"
-    equb cr
+    equs "/ExileB", cr
 .catalogue_txt
-    equs "CAT SAVES"
-    equb cr
+    equs "CAT SAVES", cr
 IF RELOC_TOGGLE_FS_TXT = TRUE OR RELOC_TOGGLE_FS = TRUE OR RELOC_TOGGLE_FS = NOP
 .reloc_net_txt
-    equs "NET"
-    equb cr
+    equs "NET", cr
 .reloc_tape_txt
-    equs "TAPE"
-    equb cr
+    equs "TAPE", cr
     equb   0
     equw osfile_control_block
     equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -6107,21 +6069,16 @@ ENDIF
 
 ELSE
 .run_ExileSR
-    equs "/ExileSR"
-    equb cr
+    equs "/ExileSR", cr
 .run_ExileB
-    equs "/ExileB"
-    equb cr
+    equs "/ExileB", cr
 .catalogue_txt
-    equs "CAT 0"
-    equb cr
+    equs "CAT 0", cr
 IF RELOC_TOGGLE_FS_TXT = TRUE OR RELOC_TOGGLE_FS = TRUE OR RELOC_TOGGLE_FS = NOP
 .reloc_disc_txt
-    equs "DISC"
-    equb cr
+    equs "DISC", cr
 .reloc_tape_txt
-    equs "TAPE"
-    equb cr
+    equs "TAPE", cr
     equb   0
     equw osfile_control_block
     equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -6130,8 +6087,8 @@ ENDIF
 
 .swr_req_txt
     equb &11, &31
-    equs "May I use your Sideways"
-    equb cr, lf, lf
+    equs "May I use your Sideways", cr
+    equb lf, lf
     equs "Ram ? (y/n)"
     equb &11, &75,   0
 .l3c2a
@@ -6579,16 +6536,11 @@ IF UNREF_DATA = DATA_V2_V3
 ; unreferenced data
     equb &2c, &d7, &3a, &65, &2c, &e5, &3a, &c9, &35, &c7, &3a, &e1, &33, &f3, &3a, &ff
     equb &ff
-    equs "Run Game"
-    equb 0
-    equs "Status"
-    equb 0
-    equs "Score Breakdown"
-    equb 0
-    equs "Load position"
-    equb 0
-    equs "Save position"
-    equb 0
+    equs "Run Game", 0
+    equs "Status", 0
+    equs "Score Breakdown", 0
+    equs "Load position", 0
+    equs "Save position", 0
     equs "Default posi"
 ELIF UNREF_DATA = DATA_MC
 ; unreferenced data
@@ -6605,12 +6557,9 @@ ELIF UNREF_DATA = DATA_MC
     equb &3a, &14, &3a, &29, &36, &1d, &3a, &b8, &34, &61, &3a, &45, &2a, &6e, &3a, &0a
     equb &2b, &34, &3a, &bd, &2a, &42, &3a, &26, &35, &24, &3a, &f7, &32, &50, &3a, &ff
     equb &ff
-    equs "Run Game"
-    equb 0
-    equs "Status"
-    equb 0
-    equs "Score Breakdown"
-    equb 0
+    equs "Run Game", 0
+    equs "Status", 0
+    equs "Score Breakdown", 0
     equs "Lo"
 ELIF UNREF_DATA = DATA_STH_V1
 ; unreferenced data
@@ -6648,12 +6597,9 @@ ELIF UNREF_DATA = DATA_STH_V1
     equb &39, &dd, &38, &f2, &34, &e6, &38, &81, &33, &2a, &39,   2, &2a, &37, &39, &8f
     equb &2a, &fd, &38, &65, &2a, &0b, &39, &ef, &33, &ed, &38, &e1, &31, &19, &39, &ff
     equb &ff
-    equs "Run Game"
-    equb 0
-    equs "Status"
-    equb 0
-    equs "Score Breakdown"
-    equb 0
+    equs "Run Game", 0
+    equs "Status", 0
+    equs "Score Breakdown", 0
     equs "Lo"
 ENDIF
 
@@ -7149,30 +7095,19 @@ IF REMOVE_DEAD_CODE = FALSE
     equb 5
 
 ; Unreferenced data
-    equs "manLI"
-    equb cr
-    equs "manLF"
-    equb cr
-    equs "manKN"
-    equb cr
-    equs "manLB"
-    equb cr
-    equs "manST"
-    equb cr
-    equs "manRU1"
-    equb cr
-    equs "manRU2"
-    equb cr
-    equs "manRU3"
-    equb cr
-    equs "line1"
-    equb cr
-    equs "line2"
-    equb cr
-    equs "line3"
-    equb cr
-    equs "line4"
-    equb cr, &6c
+    equs "manLI", cr
+    equs "manLF", cr
+    equs "manKN", cr
+    equs "manLB", cr
+    equs "manST", cr
+    equs "manRU1", cr
+    equs "manRU2", cr
+    equs "manRU3", cr
+    equs "line1", cr
+    equs "line2", cr
+    equs "line3", cr
+    equs "line4", cr
+    equs "l"
 ENDIF
 
 .end_of_reloc_code
@@ -7359,17 +7294,15 @@ ENDIF
 
 IF STATIC_TOGGLE_FS_TXT = TRUE OR STATIC_TOGGLE_FS = TRUE
 .static_tape_txt
-    equs "TAPE"
-    equb cr
+    equs "TAPE", cr
 .static_fs_txt
 IF FILE_SYSTEM = DFS
-    equs "DISC"
+    equs "DISC", cr
 ELIF FILE_SYSTEM = NFS
-    equs "NET"
+    equs "NET", cr
 ELSE
-    equs "ADFS"
+    equs "ADFS", cr
 ENDIF
-    equb cr
 ENDIF
 
 ; 
