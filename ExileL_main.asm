@@ -3158,14 +3158,24 @@ ENDIF
     rts
 }
 
-.table_03
-    equb 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.table_03a
+    equb 0, 0, 0, 0
+.table_03b
+    equb 0, 0, 0, 0
+.table_03c
+    equb 0, 0, 0, 0
+.table_03d
+    equb 0, 0, 0, 0
+.table_03e
+    equb 0, 0, 0, 0
+.table_03f
+    equb 0, 0, 0, 0
 
 .sub_c28e0
-    asl table_03 + 16
-    rol table_03 + 17
-    rol table_03 + 18
-    rol table_03 + 19
+    asl table_03e
+    rol table_03e + 1
+    rol table_03e + 2
+    rol table_03e + 3
     rts
 
 .sub_c28ed
@@ -3173,21 +3183,21 @@ ENDIF
     ldx #&18
     lda #0
 .loop_c28f4
-    sta table_03 - 1,x
+    sta table_03a - 1,x
     dex
     bne loop_c28f4
     ldy #3
 .loop_c28fc
     lda player_deaths - 1,y
-    sta table_03 + 15,y
+    sta table_03e - 1,y
     dey
     bne loop_c28fc
-    sty table_03 + 19
+    sty table_03f - 1
     ldx #2
 .c290a
     ldy #3
 .loop_c290c
-    lda table_03 + 16,y
+    lda table_03e,y
     pha
     dey
     bpl loop_c290c
@@ -3197,8 +3207,8 @@ ENDIF
     ldy #&fc
 .loop_c291c
     pla
-    adc c27dc,y
-    sta c27dc,y
+    adc table_03e - &fc,y
+    sta table_03e - &fc,y
     iny
     bne loop_c291c
     jsr sub_c28e0
@@ -3208,7 +3218,7 @@ ENDIF
     ldy #4
 .loop_c2931
     lda this_object_sprite_old,y
-    sta table_03 + 11,y
+    sta table_03d - 1,y
     dey
     bne loop_c2931
     ldx #4
@@ -3336,12 +3346,12 @@ ENDIF
     jsr sub_c2a39
     ldx #&10
     jsr sub_c2a39
-    lda table_03 + 23
+    lda table_03f + 3
     bpl c2a27
     ldx #4
     lda #0
 .loop_c2a21
-    sta table_03 + 19,x
+    sta table_03f - 1,x
     dex
     bne loop_c2a21
 .c2a27
@@ -3351,9 +3361,9 @@ ENDIF
     clc
     ldy #&fc
 .loop_c2a2b
-    lda table_03 - 232,y
-    adc table_03,x
-    sta table_03 - 232,y
+    lda table_03f - &fc,y
+    adc table_03a,x
+    sta table_03f - &fc,y
     inx
     iny
     bne loop_c2a2b
@@ -3363,9 +3373,9 @@ ENDIF
     sec
     ldy #&fc
 .loop_c2a3c
-    lda table_03 - 232,y
-    sbc table_03,x
-    sta table_03 - 232,y
+    lda table_03f - &fc,y
+    sbc table_03a,x
+    sta table_03f - &fc,y
     inx
     iny
     bne loop_c2a3c
@@ -3413,17 +3423,17 @@ ENDIF
     bpl c2a8c
 .c2a8c
     clc
-    adc table_03,x
-    sta table_03,x
+    adc table_03a,x
+    sta table_03a,x
     tya
-    adc table_03 + 1,x
-    sta table_03 + 1,x
+    adc table_03a + 1,x
+    sta table_03a + 1,x
     lda #0
-    adc table_03 + 2,x
-    sta table_03 + 2,x
+    adc table_03a + 2,x
+    sta table_03a + 2,x
     lda #0
-    adc table_03 + 3,x
-    sta table_03 + 3,x
+    adc table_03a + 3,x
+    sta table_03a + 3,x
     ldx zp_various_b
     rts
 
@@ -4149,7 +4159,7 @@ ENDIF
     sta l0062
     ldy #4
 .loop_c2e4f
-    lda table_03 + 19,y
+    lda table_03f - 1,y
     sta this_object_sprite_old,y
     dey
     bne loop_c2e4f
@@ -4293,18 +4303,18 @@ ENDIF
     jsr sub_c2fc5
     jsr sub_c2fc5
     adc l0061
-    adc table_03 + 20
+    adc table_03f
     sta l0061
     adc keys_collected + 3
     clc
     adc l0060
-    adc table_03 + 21
+    adc table_03f + 1
     sta l0060
     adc l005f
-    adc table_03 + 22
+    adc table_03f + 2
     sta l005f
     adc zp_5e
-    adc table_03 + 23
+    adc table_03f + 3
     sta zp_5e
     adc keys_collected + 4
     jsr sub_c2fc5
@@ -5374,7 +5384,7 @@ ENDIF
     tax
     ldy #&fc
 .loop_c3631
-    lda table_03,x
+    lda table_03a,x
     sta [(zp_5e - &fc) AND &ffff],y
     inx
     iny
