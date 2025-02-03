@@ -1399,19 +1399,26 @@ ENDIF
     ;;  &80 set = not in current stack
     equb   0, &7c, &60,   4, &88, &88, &a0, &a6, &ae, &83, &86, &82, &80, &80, &ad, &81
     equb &f7, &a1, &f1, &f7, &81, &8a, &ac, &d2, &df, &d4, &a3, &84, &85, &ae, &80, &80
-    equb &88, &ac, &c4, &c0,   4, &a8, &c4, &bc, &fd, &81, &c1, &d1, &91, &f1, &f1, &da
-    equb &f7, &f3, &d8, &88, &80, &83, &83, &b0, &aa, &80, &80, &87, &80, &30,   8, &10
-    equb &7c,   4, &10, &a8, &90,   4, &c1, &f1, &e1, &95, &bc, &b4, &fd, &a1, &d6, &dd
-    equb &e2,   4, &0c,   4, &20, &21, &a0, &b0, &ac, &83, &81, &84, &80, &c4, &85, &95
-    equb &a3, &b5, &f1, &ad, &c1, &81, &89, &a0, &c1, &f1, &f1, &c1, &8c, &a4, &e4, &d7
-    equb &9d, &e1, &a6, &81, &85, &83, &83, &d0, &a8,   4,   4, &d0, &88,   4,   4,   4
-    equb   8, &bd, &8a, &f1, &d1, &f1, &b1, &f1, &c1, &c1, &c1, &c1, &e2, &e4, &dc, &a0
-    equb &c2, &cb, &b8, &a8, &10, &98, &a0, &80, &83, &80, &80, &80, &80,   0, &c4, &40
-    equb &84, &28, &75, &bc, &f1, &d1, &a9, &f1, &c0, &c1, &8f, &94, &c2, &ca, &fa, &9c
-    equb &fe, &10, &14, &90, &98,   4, &a4, &80, &83, &c6, &c4, &fe, &aa, &90, &ec, &dc
-    equb &9e, &f4, &f7, &f1, &f1, &81, &f1, &f1, &b1, &db, &9e, &84, &ac, &80, &80, &80
-    equb &80, &80, &80, &80, &c0,   4,   8, &90, &a2,   4,   4,   4, &20, &bc, &53, &9d
-    equb &84, &da, &cb, &de, &c5, &a5, &c1, &f1, &70, &d0, &80
+    equb &88
+.background_objects_data_2
+    equb &ac, &c4, &c0,   4, &a8, &c4, &bc, &fd, &81, &c1, &d1, &91, &f1, &f1, &da, &f7
+    equb &f3, &d8, &88, &80, &83, &83, &b0, &aa, &80, &80, &87, &80
+    equb &30
+.background_objects_data_3
+    equb   8, &10, &7c,   4, &10, &a8, &90,   4, &c1, &f1, &e1, &95, &bc, &b4, &fd, &a1
+    equb &d6, &dd, &e2,   4, &0c,   4, &20, &21, &a0, &b0, &ac, &83, &81, &84, &80, &c4
+    equb &85, &95, &a3, &b5, &f1, &ad, &c1, &81, &89, &a0, &c1, &f1, &f1, &c1, &8c, &a4
+    equb &e4, &d7, &9d, &e1, &a6, &81, &85, &83, &83, &d0, &a8,   4,   4, &d0, &88,   4
+    equb   4,   4,   8, &bd, &8a, &f1, &d1, &f1, &b1, &f1, &c1, &c1, &c1, &c1, &e2, &e4
+    equb &dc, &a0, &c2, &cb, &b8, &a8, &10, &98
+    equb &a0
+.background_objects_data_4
+    equb &80, &83, &80, &80, &80, &80,   0, &c4, &40, &84, &28, &75, &bc, &f1, &d1, &a9
+    equb &f1, &c0, &c1, &8f, &94, &c2, &ca, &fa, &9c, &fe, &10, &14, &90, &98,   4, &a4
+    equb &80, &83, &c6, &c4, &fe, &aa, &90, &ec, &dc, &9e, &f4, &f7, &f1, &f1, &81, &f1
+    equb &f1, &b1, &db, &9e, &84, &ac, &80, &80, &80, &80, &80, &80, &80, &c0,   4,   8
+    equb &90, &a2,   4,   4,   4, &20, &bc, &53, &9d, &84, &da, &cb, &de, &c5, &a5, &c1
+    equb &f1, &70, &d0, &80
 
 .background_objects_type
     equb   0, &0f, &27, &2e,   7, &2f, &2d, &1f, &1f, &0d, &0d, &0d, &0c, &60, &2c,   0
@@ -3256,7 +3263,7 @@ ENDIF
     dex
     bne loop_c2963
 .c296d
-    lda background_objects_data + 131
+    lda background_objects_data_3 + 69
     and #8
     beq c297b
     lda #&28
@@ -3274,7 +3281,7 @@ ENDIF
     dex
     bne loop_c2985
 .c298f
-    lda background_objects_data + 40
+    lda background_objects_data_2 + 7
     ror a
     bcs c299c
     lda #&20
@@ -4318,7 +4325,7 @@ ENDIF
     sta zp_5e
     adc keys_collected + 4
     jsr sub_c2fc5
-    lda background_objects_data + 131
+    lda background_objects_data_3 + 69
     and #&7f
     jsr sub_c2fc5
     lda desired_water_level_by_x_range + 1
@@ -4326,7 +4333,7 @@ ENDIF
     jsr sub_c2fc5
     adc l2ac7
     jsr sub_c2fc5
-    lda background_objects_data + 40
+    lda background_objects_data_2 + 7
     and #&7f
     jsr sub_c2fc5
     lda #&10
